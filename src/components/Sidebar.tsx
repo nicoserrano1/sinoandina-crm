@@ -7,12 +7,11 @@ import {
   Clock, 
   Database, 
   Plus, 
-  Building2,
   SlidersHorizontal,
   PanelLeftClose,
   PanelLeftOpen,
-  UserCheck
 } from 'lucide-react';
+import ColmenaLogo from './ColmenaLogo';
 
 interface SidebarProps {
   activeTab: string;
@@ -69,22 +68,15 @@ export default function Sidebar({
     >
       {/* Brand Header */}
       <div className={`flex items-center mb-6 mt-1 ${isCollapsed ? 'justify-center' : 'justify-between px-1'}`}>
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div 
-            onClick={() => isCollapsed && setIsCollapsed(false)}
-            className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shadow-md text-base flex-shrink-0 cursor-pointer"
-            title="Sinoandina SpA"
-          >
-            <Building2 className="w-4 h-4" />
-          </div>
-          {!isCollapsed && (
-            <div className="min-w-0">
-              <h1 className="font-bold text-white text-sm tracking-tight leading-tight truncate">
-                Sinoandina
-              </h1>
-              <p className="text-[11px] text-slate-500 font-medium truncate">CRM Comercial</p>
-            </div>
-          )}
+        <div 
+          onClick={() => isCollapsed && setIsCollapsed(false)}
+          className={`flex items-center cursor-pointer ${isCollapsed ? 'justify-center' : ''}`}
+          title="Colmena — Sales & CRM"
+        >
+          <ColmenaLogo 
+            size="md" 
+            showText={!isCollapsed} 
+          />
         </div>
 
         {/* Toggle Collapse Button */}
@@ -103,17 +95,17 @@ export default function Sidebar({
       {isCollapsed ? (
         <button 
           onClick={onOpenNuevoLead}
-          className="w-10 h-10 mx-auto mb-5 flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition shadow-sm hover:shadow-md"
+          className="w-10 h-10 mx-auto mb-5 flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition shadow-[0_2px_12px_rgba(245,158,11,0.25)] hover:scale-105"
           title="Nuevo Prospecto"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-5 h-5 stroke-[2.5]" />
         </button>
       ) : (
         <button 
           onClick={onOpenNuevoLead}
-          className="w-full mb-6 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition shadow-sm hover:shadow-md"
+          className="w-full mb-6 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition shadow-[0_2px_12px_rgba(245,158,11,0.25)] hover:scale-[1.01]"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Nuevo Prospecto</span>
         </button>
       )}
@@ -140,22 +132,22 @@ export default function Sidebar({
                   isCollapsed ? 'justify-center p-2.5' : 'justify-between px-3 py-2.5'
                 } ${
                   isActive 
-                    ? 'bg-white/[0.08] text-white font-semibold shadow-sm' 
-                    : 'text-slate-400 hover:bg-white/[0.03] hover:text-slate-200'
+                    ? 'bg-amber-500/[0.08] text-amber-200 font-semibold border border-amber-500/20 shadow-sm' 
+                    : 'text-slate-400 hover:bg-white/[0.03] hover:text-slate-200 border border-transparent'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-blue-400' : 'text-slate-500'}`} />
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-amber-400' : 'text-slate-500'}`} />
                   {!isCollapsed && <span className="truncate">{item.label}</span>}
                 </div>
 
                 {/* Badge con número */}
                 {item.badge !== undefined && item.badge > 0 && (
                   isCollapsed ? (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500 ring-2 ring-[#08090C]" />
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-[#08090C]" />
                   ) : (
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                      item.badgeColor || (isActive ? 'bg-white/10 text-white' : 'bg-white/5 text-slate-400')
+                      item.badgeColor || (isActive ? 'bg-amber-500/20 text-amber-300' : 'bg-white/5 text-slate-400')
                     }`}>
                       {item.badge}
                     </span>

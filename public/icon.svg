@@ -1,4 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" rx="8" fill="#2563eb"/>
-  <path d="M10 24V8h5a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-2v6h-3zm3-9h2a2 2 0 1 0 0-4h-2v4z" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <rect width="40" height="40" rx="10" fill="#08090C"/>
+  <defs>
+    <linearGradient id="colmena-top" x1="7" y1="5" x2="33" y2="20" gradientUnits="userSpaceOnUse">
+      <stop stopColor="#FDE68A" />
+      <stop offset="1" stopColor="#F59E0B" />
+    </linearGradient>
+    <linearGradient id="colmena-left" x1="7" y1="14" x2="20" y2="35" gradientUnits="userSpaceOnUse">
+      <stop stopColor="#F59E0B" />
+      <stop offset="1" stopColor="#D97706" />
+    </linearGradient>
+    <linearGradient id="colmena-right" x1="21" y1="14" x2="33" y2="35" gradientUnits="userSpaceOnUse">
+      <stop stopColor="#D97706" />
+      <stop offset="1" stopColor="#92400E" />
+    </linearGradient>
+  </defs>
+  <path d="M 20 6 L 31.5 12.6 L 20 19.3 L 8.5 12.6 Z" fill="url(#colmena-top)" stroke="#FFFBEB" stroke-width="0.5"/>
+  <path d="M 8.5 14.7 L 19 20.8 L 19 33.2 L 8.5 27.2 Z" fill="url(#colmena-left)" stroke="#FEF3C7" stroke-width="0.5"/>
+  <path d="M 21 20.8 L 31.5 14.7 L 31.5 27.2 L 21 33.2 Z" fill="url(#colmena-right)" stroke="#FDE68A" stroke-width="0.5"/>
+  <circle cx="20" cy="20" r="1.5" fill="#FFFBEB"/>
 </svg>

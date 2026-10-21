@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Sinoandina Revenue Machine · SaaS B2B CRM & Prospector",
-  description: "Plataforma comercial B2B con IA: Prospección inteligente, CRM Kanban, WhatsApp y Outreach Antispam.",
+  title: "Colmena · CRM & Prospección Comercial B2B",
+  description: "Tu colmena comercial: prospección inteligente con IA, embudo Kanban de alta conversión y cierre de tratos.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
