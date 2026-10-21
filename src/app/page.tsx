@@ -7,7 +7,6 @@ import KanbanBoard from '@/components/KanbanBoard';
 import ProspectorPanel from '@/components/ProspectorPanel';
 import SeguimientosPanel from '@/components/SeguimientosPanel';
 import TableView from '@/components/TableView';
-import PlanesPanel from '@/components/PlanesPanel';
 import ModalNuevoLead from '@/components/ModalNuevoLead';
 import ModalLeadFicha from '@/components/ModalLeadFicha';
 import ModalEnviarCorreo from '@/components/ModalEnviarCorreo';
@@ -17,14 +16,13 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState('kanban');
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creditos, setCreditos] = useState(250);
 
   // Modales
   const [isModalNuevoOpen, setIsModalNuevoOpen] = useState(false);
   const [selectedLeadForEdit, setSelectedLeadForEdit] = useState<Lead | null>(null);
   const [selectedLeadForEmail, setSelectedLeadForEmail] = useState<Lead | null>(null);
 
-  // Cargar leads desde la API
+  // Cargar leads desde la API de Supabase
   const fetchLeads = async () => {
     try {
       setLoading(true);
@@ -44,7 +42,7 @@ export default function Home() {
     fetchLeads();
   }, []);
 
-  // Calcular métricas del Pipeline
+  // Métricas del Pipeline
   const metrics: PipelineMetrics = React.useMemo(() => {
     const m = {
       total: 0,
@@ -56,7 +54,7 @@ export default function Home() {
       ganados: 0,
       descartados: 0,
       valorPipeline: 0,
-      creditosDisponibles: creditos
+      creditosDisponibles: 999
     };
 
     leads.forEach((l) => {
@@ -77,11 +75,10 @@ export default function Home() {
     });
 
     return m;
-  }, [leads, creditos]);
+  }, [leads]);
 
   // Manejadores de Estado
   const handleMoverEstado = async (id: string, nuevoEstado: LeadStatus) => {
-    // Actualización optimista en UI
     setLeads((prev) =>
       prev.map((l) => (l.id === id ? { ...l, estado: nuevoEstado } : l))
     );
@@ -118,14 +115,6 @@ export default function Home() {
     setActiveTab('kanban');
   };
 
-  const handleDescontarCreditos = (cantidad: number) => {
-    setCreditos((prev) => Math.max(0, prev - cantidad));
-  };
-
-  const handleRecargarCreditos = (cantidad: number) => {
-    setCreditos((prev) => prev + cantidad);
-  };
-
   const handleEmailEnviado = (leadId: string) => {
     handleMoverEstado(leadId, 'Contactado');
   };
@@ -139,11 +128,10 @@ export default function Home() {
   }, [leads]);
 
   const titulosVistas: Record<string, string> = {
-    kanban: '📌 Pipeline Comercial (Kanban)',
-    prospector: '🔍 Prospector B2B Universal con IA',
-    seguimientos: '🔄 Detector de Seguimientos Pendientes',
-    tabla: '📋 Base de Datos de Prospectos',
-    planes: '💎 Planes & Facturación SaaS'
+    kanban: 'Pipeline Comercial',
+    prospector: 'Prospección de Empresas',
+    seguimientos: 'Seguimientos Pendientes',
+    tabla: 'Base de Datos de Clientes'
   };
 
   return (
@@ -153,20 +141,19 @@ export default function Home() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenNuevoLead={() => setIsModalNuevoOpen(true)}
-        creditos={creditos}
         totalLeads={metrics.total}
         seguimientosCount={seguimientosCount}
       />
 
       {/* Área Principal */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* Barra Superior con KPIs */}
+        {/* Barra Superior */}
         <HeaderStats
           title={titulosVistas[activeTab] || 'Dashboard'}
           metrics={metrics}
         />
 
-        {/* Contenido Dinámico según pestaña (Ajuste 100% de pantalla para Kanban) */}
+        {/* Contenido Dinámico */}
         <main className={`flex-1 min-h-0 ${activeTab === 'kanban' ? 'overflow-hidden p-5 flex flex-col' : 'overflow-y-auto p-6'}`}>
           {activeTab === 'kanban' && (
             <KanbanBoard
@@ -181,8 +168,6 @@ export default function Home() {
           {activeTab === 'prospector' && (
             <ProspectorPanel
               onLeadsAgregados={handleLeadsAgregadosPorProspector}
-              creditos={creditos}
-              onDescontarCreditos={handleDescontarCreditos}
             />
           )}
 
@@ -197,13 +182,6 @@ export default function Home() {
             <TableView
               leads={leads}
               onEditLead={(lead) => setSelectedLeadForEdit(lead)}
-            />
-          )}
-
-          {activeTab === 'planes' && (
-            <PlanesPanel
-              creditosActuales={creditos}
-              onRecargar={handleRecargarCreditos}
             />
           )}
         </main>

@@ -5,9 +5,7 @@ import {
   Search, 
   RefreshCw, 
   Download, 
-  SlidersHorizontal,
-  ArrowUpDown,
-  Sparkles
+  ArrowUpDown
 } from 'lucide-react';
 import { Lead, LeadStatus } from '@/lib/types';
 import LeadCard from './LeadCard';
@@ -20,13 +18,13 @@ interface KanbanBoardProps {
   onRefresh: () => void;
 }
 
-const COLUMNAS: { id: LeadStatus; label: string; emoji: string; color: string; dotColor: string }[] = [
-  { id: 'Nuevo', label: 'Nuevos', emoji: '🆕', color: 'text-blue-400', dotColor: 'bg-blue-500' },
-  { id: 'Contactado', label: 'Contactados', emoji: '✉️', color: 'text-amber-400', dotColor: 'bg-amber-500' },
-  { id: 'Seguimiento', label: 'Seguimiento', emoji: '🔄', color: 'text-orange-400', dotColor: 'bg-orange-500' },
-  { id: 'En Reunión', label: 'En Reunión', emoji: '🤝', color: 'text-purple-400', dotColor: 'bg-purple-500' },
-  { id: 'Cotizado', label: 'Cotizado', emoji: '📝', color: 'text-pink-400', dotColor: 'bg-pink-500' },
-  { id: 'Cerrado Ganado', label: 'Ganado', emoji: '🏆', color: 'text-emerald-400', dotColor: 'bg-emerald-500' },
+const COLUMNAS: { id: LeadStatus; label: string; dotColor: string }[] = [
+  { id: 'Nuevo', label: 'Nuevos', dotColor: 'bg-blue-500' },
+  { id: 'Contactado', label: 'Contactados', dotColor: 'bg-amber-500' },
+  { id: 'Seguimiento', label: 'Seguimiento', dotColor: 'bg-orange-500' },
+  { id: 'En Reunión', label: 'En Reunión', dotColor: 'bg-purple-500' },
+  { id: 'Cotizado', label: 'Cotizado', dotColor: 'bg-pink-500' },
+  { id: 'Cerrado Ganado', label: 'Cerrado Ganado', dotColor: 'bg-emerald-500' },
 ];
 
 export default function KanbanBoard({
@@ -106,45 +104,45 @@ export default function KanbanBoard({
 
   return (
     <div className="h-full flex flex-col min-h-0 overflow-hidden">
-      {/* Kanban Toolbar Pro */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-3.5 flex-shrink-0">
-        {/* Buscador reactivo */}
-        <div className="relative flex-1 min-w-[260px] max-w-sm">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+      {/* Toolbar Limpia con Espacio para Respirar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 flex-shrink-0">
+        {/* Buscador minimalista */}
+        <div className="relative flex-1 min-w-[240px] max-w-sm">
+          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Filtrar por empresa, decisor, partida o material..."
-            className="w-full bg-[#0E1017] border border-white/10 focus:border-blue-500 rounded-xl py-2 pl-10 pr-4 text-xs text-white placeholder-slate-400 outline-none transition shadow-sm"
+            placeholder="Buscar empresa, contacto o partida..."
+            className="w-full bg-[#11141D] border border-white/[0.08] focus:border-blue-500/50 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-slate-500 outline-none transition"
           />
         </div>
 
         {/* Filtros Rápidos */}
-        <div className="flex items-center gap-1.5 bg-[#0E1017] p-1 rounded-xl border border-white/10 text-xs">
+        <div className="flex items-center gap-1 bg-[#11141D] p-1 rounded-xl border border-white/[0.08] text-xs">
           <button
             onClick={() => setFiltroRapido('todos')}
-            className={`px-3 py-1 rounded-lg font-semibold transition ${
-              filtroRapido === 'todos' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+            className={`px-3 py-1 rounded-lg font-medium transition ${
+              filtroRapido === 'todos' ? 'bg-white/[0.08] text-white' : 'text-slate-400 hover:text-white'
             }`}
           >
             Todos ({leads.length})
           </button>
           <button
             onClick={() => setFiltroRapido('con_monto')}
-            className={`px-3 py-1 rounded-lg font-semibold transition ${
-              filtroRapido === 'con_monto' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
+            className={`px-3 py-1 rounded-lg font-medium transition ${
+              filtroRapido === 'con_monto' ? 'bg-white/[0.08] text-emerald-400' : 'text-slate-400 hover:text-white'
             }`}
           >
-            Con Monto CLP
+            Con Monto
           </button>
           <button
             onClick={() => setFiltroRapido('estancados')}
-            className={`px-3 py-1 rounded-lg font-semibold transition ${
-              filtroRapido === 'estancados' ? 'bg-amber-600 text-white' : 'text-slate-400 hover:text-white'
+            className={`px-3 py-1 rounded-lg font-medium transition ${
+              filtroRapido === 'estancados' ? 'bg-rose-500/15 text-rose-300' : 'text-slate-400 hover:text-white'
             }`}
           >
-            ⚠️ En Riesgo (+3d)
+            En Riesgo (+3d)
           </button>
         </div>
 
@@ -153,7 +151,7 @@ export default function KanbanBoard({
           <select
             value={orden}
             onChange={(e) => setOrden(e.target.value as any)}
-            className="bg-[#0E1017] border border-white/10 text-slate-300 text-xs rounded-xl px-3 py-1.5 outline-none cursor-pointer"
+            className="bg-[#11141D] border border-white/[0.08] text-slate-300 text-xs rounded-xl px-3 py-1.5 outline-none cursor-pointer"
           >
             <option value="recientes">Recientes primero</option>
             <option value="mayor_monto">Mayor Monto ($)</option>
@@ -162,24 +160,24 @@ export default function KanbanBoard({
 
           <button
             onClick={exportarCSV}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0E1017] hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-semibold transition"
-            title="Exportar base completa a CSV / Excel"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#11141D] hover:bg-white/[0.05] border border-white/[0.08] text-slate-300 hover:text-white text-xs font-medium transition"
+            title="Exportar a CSV"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Exportar CSV</span>
+            <span>Exportar</span>
           </button>
 
           <button
             onClick={onRefresh}
-            className="p-2 rounded-xl bg-[#0E1017] hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs transition"
-            title="Refrescar datos desde Supabase"
+            className="p-2 rounded-xl bg-[#11141D] hover:bg-white/[0.05] border border-white/[0.08] text-slate-400 hover:text-white text-xs transition"
+            title="Refrescar datos"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Grid de Columnas Kanban: 100% Ajustado a la pantalla con ancho óptimo */}
+      {/* Grid de Columnas Kanban con Drag & Drop Limpio */}
       <div className="flex-1 flex gap-3.5 overflow-x-auto overflow-y-hidden min-h-0 pb-1">
         {COLUMNAS.map((col) => {
           const leadsColumna = leadsFiltrados.filter((l) => l.estado === col.id);
@@ -202,36 +200,37 @@ export default function KanbanBoard({
                 }
                 setDragOverCol(null);
               }}
-              className={`w-[290px] min-w-[290px] max-w-[290px] flex-shrink-0 glass-panel rounded-2xl flex flex-col h-full overflow-hidden transition-all duration-200 ${
-                isOver ? 'kanban-dropzone-active border-dashed border-2' : ''
+              className={`w-[290px] min-w-[290px] max-w-[290px] flex-shrink-0 bg-[#0C0F17] border rounded-2xl flex flex-col h-full overflow-hidden transition-all duration-150 ${
+                isOver 
+                  ? 'border-blue-500/60 bg-blue-500/[0.03]' 
+                  : 'border-white/[0.06]'
               }`}
             >
               {/* Header de Columna */}
-              <div className="p-3.5 border-b border-white/5 flex items-center justify-between flex-shrink-0 bg-[#0E1017]/90">
+              <div className="p-3.5 border-b border-white/[0.06] flex items-center justify-between flex-shrink-0 bg-[#0C0F17]">
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${col.dotColor}`} />
-                  <span className={`text-xs font-extrabold tracking-wide uppercase ${col.color}`}>
+                  <span className="text-xs font-bold tracking-tight text-slate-200">
                     {col.label}
                   </span>
                 </div>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/5 text-slate-300 border border-white/5">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/[0.04] text-slate-400">
                   {leadsColumna.length}
                 </span>
               </div>
 
-              {/* Subtotal en CLP si hay montos en la columna */}
+              {/* Subtotal en CLP si hay montos */}
               {totalColumna > 0 && (
-                <div className="px-3.5 py-1 bg-emerald-500/5 border-b border-emerald-500/10 text-[11px] font-extrabold text-emerald-400 text-right">
+                <div className="px-3.5 py-1 bg-white/[0.02] border-b border-white/[0.04] text-[11px] font-semibold text-emerald-400 text-right">
                   ${totalColumna.toLocaleString('es-CL')} CLP
                 </div>
               )}
 
-              {/* Lista de Tarjetas / Drop Zone (Scroll suave y libre de scrollbars dobles) */}
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 space-y-3">
+              {/* Lista de Tarjetas (Scroll limpio y ajustado) */}
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2.5 space-y-2.5">
                 {leadsColumna.length === 0 ? (
-                  <div className="h-28 border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center text-xs text-slate-500 font-medium p-3 text-center">
-                    <span className="text-base opacity-40 mb-1">📥</span>
-                    <span className="text-[11px]">Arrastra una tarjeta aquí</span>
+                  <div className="h-28 border border-dashed border-white/[0.06] rounded-xl flex items-center justify-center text-xs text-slate-600 font-medium">
+                    Arrastra una tarjeta aquí
                   </div>
                 ) : (
                   leadsColumna.map((lead) => (
@@ -240,7 +239,6 @@ export default function KanbanBoard({
                       lead={lead}
                       onEdit={onEditLead}
                       onSendEmail={onSendEmail}
-                      onMoverEstado={onMoverEstado}
                     />
                   ))
                 )}
