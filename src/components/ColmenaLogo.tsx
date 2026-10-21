@@ -23,80 +23,133 @@ export default function ColmenaLogo({
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
       <div className={`relative ${sizeMap[size]} flex items-center justify-center flex-shrink-0`}>
-        {/* Glow effect */}
-        <div className="absolute inset-0 bg-amber-500/25 rounded-xl blur-md" />
+        {/* Glow cálido ambiental */}
+        <div className="absolute inset-0 bg-amber-500/20 rounded-full blur-md" />
         
-        {/* Logo SVG Icon */}
+        {/* Isotipo: Abeja Exploradora Geométrica (Scout Bee) */}
         <svg 
-          viewBox="0 0 40 40" 
+          viewBox="0 0 100 100" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full relative z-10 drop-shadow-[0_2px_10px_rgba(245,158,11,0.45)]"
+          className="w-full h-full relative z-10 drop-shadow-[0_2px_12px_rgba(245,158,11,0.45)]"
         >
           <defs>
-            <linearGradient id="colmena-grad-top" x1="7" y1="5" x2="33" y2="20" gradientUnits="userSpaceOnUse">
+            {/* Gradientes dorados y ámbar de alta definición */}
+            <linearGradient id="scout-gold-light" x1="20" y1="20" x2="80" y2="80" gradientUnits="userSpaceOnUse">
               <stop stopColor="#FDE68A" />
-              <stop offset="1" stopColor="#F59E0B" />
-            </linearGradient>
-            <linearGradient id="colmena-grad-left" x1="7" y1="14" x2="20" y2="35" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#F59E0B" />
+              <stop offset="0.5" stopColor="#F59E0B" />
               <stop offset="1" stopColor="#D97706" />
             </linearGradient>
-            <linearGradient id="colmena-grad-right" x1="21" y1="14" x2="33" y2="35" gradientUnits="userSpaceOnUse">
+
+            <linearGradient id="scout-gold-dark" x1="40" y1="30" x2="80" y2="90" gradientUnits="userSpaceOnUse">
               <stop stopColor="#D97706" />
+              <stop offset="1" stopColor="#78350F" />
+            </linearGradient>
+
+            <linearGradient id="wing-primary" x1="15" y1="20" x2="65" y2="50" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#FDE68A" />
+              <stop offset="0.6" stopColor="#F59E0B" />
+              <stop offset="1" stopColor="#B45309" />
+            </linearGradient>
+
+            <linearGradient id="wing-secondary" x1="25" y1="35" x2="60" y2="55" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#F59E0B" />
               <stop offset="1" stopColor="#92400E" />
             </linearGradient>
-            <radialGradient id="colmena-core-glow" cx="20" cy="20" r="16" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#F59E0B" stopOpacity="0.5" />
-              <stop offset="1" stopColor="#F59E0B" stopOpacity="0" />
-            </radialGradient>
           </defs>
 
-          {/* Core Glow */}
-          <circle cx="20" cy="20" r="15" fill="url(#colmena-core-glow)" />
-
-          {/* Top Isometric Facet */}
+          {/* Ala Superior Principal (Facetada Aerodinámica) */}
           <path 
-            d="M 20 5 L 32.5 12.2 L 20 19.5 L 7.5 12.2 Z" 
-            fill="url(#colmena-grad-top)" 
-            stroke="#FFFBEB"
-            strokeWidth="0.6"
-            strokeLinejoin="round"
+            d="M 58 43 L 15 25 L 35 48 L 56 47 Z" 
+            fill="url(#wing-primary)" 
+            stroke="#FFFBEB" 
+            strokeWidth="0.8" 
+            strokeLinejoin="round" 
           />
 
-          {/* Bottom Left Facet */}
+          {/* Ala Secundaria (Sombra y Profundidad) */}
           <path 
-            d="M 7.5 14.5 L 19 21.2 L 19 34.8 L 7.5 28.2 Z" 
-            fill="url(#colmena-grad-left)" 
-            stroke="#FEF3C7"
-            strokeWidth="0.6"
-            strokeLinejoin="round"
+            d="M 55 49 L 23 45 L 42 60 L 53 53 Z" 
+            fill="url(#wing-secondary)" 
+            stroke="#FEF3C7" 
+            strokeWidth="0.8" 
+            strokeLinejoin="round" 
           />
 
-          {/* Bottom Right Facet */}
+          {/* Cabeza & Antenas de Radar */}
           <path 
-            d="M 21 21.2 L 32.5 14.5 L 32.5 28.2 L 21 34.8 Z" 
-            fill="url(#colmena-grad-right)" 
-            stroke="#FDE68A"
-            strokeWidth="0.6"
-            strokeLinejoin="round"
+            d="M 72 38 L 84 41 L 79 50 L 69 44 Z" 
+            fill="url(#scout-gold-light)" 
+            stroke="#FFFBEB" 
+            strokeWidth="0.8" 
+            strokeLinejoin="round" 
+          />
+          {/* Antena estilizada */}
+          <path 
+            d="M 80 40 L 89 36 L 93 39" 
+            stroke="#FDE68A" 
+            strokeWidth="1.8" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
           />
 
-          {/* Center Precision Node */}
-          <circle cx="20" cy="20" r="1.6" fill="#FFFBEB" />
+          {/* Tórax Central Facetado */}
+          <path 
+            d="M 57 44 L 69 44 L 66 58 L 55 56 Z" 
+            fill="url(#scout-gold-light)" 
+            stroke="#FEF3C7" 
+            strokeWidth="0.8" 
+            strokeLinejoin="round" 
+          />
+
+          {/* Pata / Gancho de Precisión */}
+          <path 
+            d="M 64 56 L 68 64 L 62 67" 
+            stroke="#F59E0B" 
+            strokeWidth="1.6" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+          />
+
+          {/* Abdomen Segmentado - Franja 1 */}
+          <path 
+            d="M 55 57 L 50 51 L 44 60 L 50 67 Z" 
+            fill="url(#scout-gold-light)" 
+            stroke="#FEF3C7" 
+            strokeWidth="0.8" 
+            strokeLinejoin="round" 
+          />
+
+          {/* Abdomen Segmentado - Franja 2 */}
+          <path 
+            d="M 48 65 L 43 59 L 37 68 L 42 75 Z" 
+            fill="url(#scout-gold-dark)" 
+            stroke="#FDE68A" 
+            strokeWidth="0.8" 
+            strokeLinejoin="round" 
+          />
+
+          {/* Abdomen Segmentado - Franja 3 / Aguijón de Cierre */}
+          <path 
+            d="M 41 74 L 36 68 L 30 75 L 34 83 C 35 84, 38 82, 41 74 Z" 
+            fill="url(#scout-gold-light)" 
+            stroke="#FFFBEB" 
+            strokeWidth="0.8" 
+            strokeLinejoin="round" 
+          />
         </svg>
       </div>
 
       {showText && (
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-white text-sm tracking-tight leading-none truncate">
+            <span className="font-extrabold text-white text-sm tracking-widest uppercase leading-none truncate">
               Colmena
             </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block shadow-[0_0_6px_#f59e0b]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block shadow-[0_0_8px_#f59e0b]" />
           </div>
-          <span className="text-[10px] text-amber-400/90 font-medium tracking-wider uppercase mt-1 truncate">
-            CRM & Ventas B2B
+          <span className="text-[9px] text-amber-400/90 font-bold tracking-widest uppercase mt-1 truncate">
+            Commercial Intelligence
           </span>
         </div>
       )}

@@ -1,21 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
-  <rect width="40" height="40" rx="10" fill="#08090C"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <rect width="100" height="100" rx="24" fill="#08090C"/>
   <defs>
-    <linearGradient id="colmena-top" x1="7" y1="5" x2="33" y2="20" gradientUnits="userSpaceOnUse">
+    <linearGradient id="scout-gold-light" x1="20" y1="20" x2="80" y2="80" gradientUnits="userSpaceOnUse">
       <stop stopColor="#FDE68A" />
-      <stop offset="1" stopColor="#F59E0B" />
-    </linearGradient>
-    <linearGradient id="colmena-left" x1="7" y1="14" x2="20" y2="35" gradientUnits="userSpaceOnUse">
-      <stop stopColor="#F59E0B" />
+      <stop offset="0.5" stopColor="#F59E0B" />
       <stop offset="1" stopColor="#D97706" />
     </linearGradient>
-    <linearGradient id="colmena-right" x1="21" y1="14" x2="33" y2="35" gradientUnits="userSpaceOnUse">
+    <linearGradient id="scout-gold-dark" x1="40" y1="30" x2="80" y2="90" gradientUnits="userSpaceOnUse">
       <stop stopColor="#D97706" />
+      <stop offset="1" stopColor="#78350F" />
+    </linearGradient>
+    <linearGradient id="wing-primary" x1="15" y1="20" x2="65" y2="50" gradientUnits="userSpaceOnUse">
+      <stop stopColor="#FDE68A" />
+      <stop offset="0.6" stopColor="#F59E0B" />
+      <stop offset="1" stopColor="#B45309" />
+    </linearGradient>
+    <linearGradient id="wing-secondary" x1="25" y1="35" x2="60" y2="55" gradientUnits="userSpaceOnUse">
+      <stop stopColor="#F59E0B" />
       <stop offset="1" stopColor="#92400E" />
     </linearGradient>
   </defs>
-  <path d="M 20 6 L 31.5 12.6 L 20 19.3 L 8.5 12.6 Z" fill="url(#colmena-top)" stroke="#FFFBEB" stroke-width="0.5"/>
-  <path d="M 8.5 14.7 L 19 20.8 L 19 33.2 L 8.5 27.2 Z" fill="url(#colmena-left)" stroke="#FEF3C7" stroke-width="0.5"/>
-  <path d="M 21 20.8 L 31.5 14.7 L 31.5 27.2 L 21 33.2 Z" fill="url(#colmena-right)" stroke="#FDE68A" stroke-width="0.5"/>
-  <circle cx="20" cy="20" r="1.5" fill="#FFFBEB"/>
+
+  {/* Ala Superior Principal */}
+  <path d="M 58 43 L 15 25 L 35 48 L 56 47 Z" fill="url(#wing-primary)" stroke="#FFFBEB" stroke-width="0.8" stroke-linejoin="round" />
+  {/* Ala Secundaria */}
+  <path d="M 55 49 L 23 45 L 42 60 L 53 53 Z" fill="url(#wing-secondary)" stroke="#FEF3C7" stroke-width="0.8" stroke-linejoin="round" />
+  {/* Cabeza & Antena */}
+  <path d="M 72 38 L 84 41 L 79 50 L 69 44 Z" fill="url(#scout-gold-light)" stroke="#FFFBEB" stroke-width="0.8" stroke-linejoin="round" />
+  <path d="M 80 40 L 89 36 L 93 39" stroke="#FDE68A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  {/* Tórax */}
+  <path d="M 57 44 L 69 44 L 66 58 L 55 56 Z" fill="url(#scout-gold-light)" stroke="#FEF3C7" stroke-width="0.8" stroke-linejoin="round" />
+  <path d="M 64 56 L 68 64 L 62 67" stroke="#F59E0B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+  {/* Abdomen Segmentado */}
+  <path d="M 55 57 L 50 51 L 44 60 L 50 67 Z" fill="url(#scout-gold-light)" stroke="#FEF3C7" stroke-width="0.8" stroke-linejoin="round" />
+  <path d="M 48 65 L 43 59 L 37 68 L 42 75 Z" fill="url(#scout-gold-dark)" stroke="#FDE68A" stroke-width="0.8" stroke-linejoin="round" />
+  <path d="M 41 74 L 36 68 L 30 75 L 34 83 C 35 84, 38 82, 41 74 Z" fill="url(#scout-gold-light)" stroke="#FFFBEB" stroke-width="0.8" stroke-linejoin="round" />
 </svg>
