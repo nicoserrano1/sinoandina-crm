@@ -10,17 +10,44 @@ import TableView from '@/components/TableView';
 import ModalNuevoLead from '@/components/ModalNuevoLead';
 import ModalLeadFicha from '@/components/ModalLeadFicha';
 import ModalEnviarCorreo from '@/components/ModalEnviarCorreo';
-import { Lead, LeadStatus, PipelineMetrics } from '@/lib/types';
+import ModalPersonalizarEtapas from '@/components/ModalPersonalizarEtapas';
+import { Lead, LeadStatus, PipelineMetrics, PipelineEtapa } from '@/lib/types';
+
+const ETAPAS_DEFAULT: PipelineEtapa[] = [
+  { id: 'Nuevo', nombre: 'Nuevos', dotColor: 'bg-blue-500' },
+  { id: 'Contactado', nombre: 'Contactados', dotColor: 'bg-amber-500' },
+  { id: 'Seguimiento', nombre: 'Seguimiento', dotColor: 'bg-orange-500' },
+  { id: 'En Reunión', nombre: 'En Reunión', dotColor: 'bg-purple-500' },
+  { id: 'Cotizado', nombre: 'Cotizado', dotColor: 'bg-pink-500' },
+  { id: 'Cerrado Ganado', nombre: 'Cerrado Ganado', dotColor: 'bg-emerald-500' },
+];
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('kanban');
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [etapas, setEtapas] = useState<PipelineEtapa[]>(ETAPAS_DEFAULT);
 
   // Modales
   const [isModalNuevoOpen, setIsModalNuevoOpen] = useState(false);
+  const [isModalEtapasOpen, setIsModalEtapasOpen] = useState(false);
   const [selectedLeadForEdit, setSelectedLeadForEdit] = useState<Lead | null>(null);
   const [selectedLeadForEmail, setSelectedLeadForEmail] = useState<Lead | null>(null);
+
+  // Cargar etapas personalizadas desde almacenamiento local
+  useEffect(() => {
+    try {
+      const guardadas = localStorage.getItem('sinoandina_pipeline_etapas');
+      if (guardadas) {
+        const parsed = JSON.parse(guardadas);
+        if (Array.isArray(parsed) && parsed.length >= 2) {
+          setEtapas(parsed);
+        }
+      }
+    } catch (e) {
+      console.error('Error cargando etapas locales:', e);
+    }
+  }, []);
 
   // Cargar leads desde la API de Supabase
   const fetchLeads = async () => {
@@ -41,6 +68,23 @@ export default function Home() {
   useEffect(() => {
     fetchLeads();
   }, []);
+
+  // Guardar etapas personalizadas
+  const handleGuardarEtapas = (nuevasEtapas: PipelineEtapa[]) => {
+    setEtapas(nuevasEtapas);
+    try {
+      localStorage.setItem('sinoandina_pipeline_etapas', JSON.stringify(nuevasEtapas));
+    } catch (e) {
+      console.error('Error guardando etapas:', e);
+    }
+  };
+
+  const handleRestablecerEtapasDefecto = () => {
+    setEtapas(ETAPAS_DEFAULT);
+    try {
+      localStorage.removeItem('sinoandina_pipeline_etapas');
+    } catch (e) {}
+  };
 
   // Métricas del Pipeline
   const metrics: PipelineMetrics = React.useMemo(() => {
@@ -158,10 +202,12 @@ export default function Home() {
           {activeTab === 'kanban' && (
             <KanbanBoard
               leads={leads}
+              etapas={etapas}
               onEditLead={(lead) => setSelectedLeadForEdit(lead)}
               onSendEmail={(lead) => setSelectedLeadForEmail(lead)}
               onMoverEstado={handleMoverEstado}
               onRefresh={fetchLeads}
+              onOpenPersonalizarEtapas={() => setIsModalEtapasOpen(true)}
             />
           )}
 
@@ -200,6 +246,7 @@ export default function Home() {
         onClose={() => setSelectedLeadForEdit(null)}
         onLeadActualizado={handleLeadActualizado}
         onLeadDescartado={handleLeadDescartado}
+        etapas={etapas}
       />
 
       <ModalEnviarCorreo
@@ -207,6 +254,14 @@ export default function Home() {
         isOpen={Boolean(selectedLeadForEmail)}
         onClose={() => setSelectedLeadForEmail(null)}
         onEmailEnviado={handleEmailEnviado}
+      />
+
+      <ModalPersonalizarEtapas
+        isOpen={isModalEtapasOpen}
+        onClose={() => setIsModalEtapasOpen(false)}
+        etapasActuales={etapas}
+        onGuardarEtapas={handleGuardarEtapas}
+        onRestablecerDefecto={handleRestablecerEtapasDefecto}
       />
     </div>
   );

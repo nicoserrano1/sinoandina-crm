@@ -5,34 +5,29 @@ import {
   Search, 
   RefreshCw, 
   Download, 
-  ArrowUpDown
+  Settings2
 } from 'lucide-react';
-import { Lead, LeadStatus } from '@/lib/types';
+import { Lead, LeadStatus, PipelineEtapa } from '@/lib/types';
 import LeadCard from './LeadCard';
 
 interface KanbanBoardProps {
   leads: Lead[];
+  etapas: PipelineEtapa[];
   onEditLead: (lead: Lead) => void;
   onSendEmail: (lead: Lead) => void;
   onMoverEstado: (id: string, nuevoEstado: LeadStatus) => void;
   onRefresh: () => void;
+  onOpenPersonalizarEtapas: () => void;
 }
-
-const COLUMNAS: { id: LeadStatus; label: string; dotColor: string }[] = [
-  { id: 'Nuevo', label: 'Nuevos', dotColor: 'bg-blue-500' },
-  { id: 'Contactado', label: 'Contactados', dotColor: 'bg-amber-500' },
-  { id: 'Seguimiento', label: 'Seguimiento', dotColor: 'bg-orange-500' },
-  { id: 'En Reunión', label: 'En Reunión', dotColor: 'bg-purple-500' },
-  { id: 'Cotizado', label: 'Cotizado', dotColor: 'bg-pink-500' },
-  { id: 'Cerrado Ganado', label: 'Cerrado Ganado', dotColor: 'bg-emerald-500' },
-];
 
 export default function KanbanBoard({
   leads,
+  etapas,
   onEditLead,
   onSendEmail,
   onMoverEstado,
-  onRefresh
+  onRefresh,
+  onOpenPersonalizarEtapas
 }: KanbanBoardProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroRapido, setFiltroRapido] = useState<'todos' | 'con_monto' | 'estancados'>('todos');
@@ -104,7 +99,7 @@ export default function KanbanBoard({
 
   return (
     <div className="h-full flex flex-col min-h-0 overflow-hidden">
-      {/* Toolbar Limpia con Espacio para Respirar */}
+      {/* Toolbar Limpia con Botón de Personalización */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4 flex-shrink-0">
         {/* Buscador minimalista */}
         <div className="relative flex-1 min-w-[240px] max-w-sm">
@@ -146,7 +141,7 @@ export default function KanbanBoard({
           </button>
         </div>
 
-        {/* Orden y Exportar */}
+        {/* Orden, Personalizar y Exportar */}
         <div className="flex items-center gap-2">
           <select
             value={orden}
@@ -157,6 +152,15 @@ export default function KanbanBoard({
             <option value="mayor_monto">Mayor Monto ($)</option>
             <option value="dias">Más días sin contacto</option>
           </select>
+
+          <button
+            onClick={onOpenPersonalizarEtapas}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#11141D] hover:bg-white/[0.05] border border-white/[0.08] text-slate-300 hover:text-white text-xs font-medium transition"
+            title="Personalizar columnas y etapas del pipeline"
+          >
+            <Settings2 className="w-3.5 h-3.5 text-blue-400" />
+            <span>Etapas</span>
+          </button>
 
           <button
             onClick={exportarCSV}
@@ -177,9 +181,9 @@ export default function KanbanBoard({
         </div>
       </div>
 
-      {/* Grid de Columnas Kanban con Drag & Drop Limpio */}
+      {/* Grid Dinámico de Columnas Personalizadas con Drag & Drop */}
       <div className="flex-1 flex gap-3.5 overflow-x-auto overflow-y-hidden min-h-0 pb-1">
-        {COLUMNAS.map((col) => {
+        {etapas.map((col) => {
           const leadsColumna = leadsFiltrados.filter((l) => l.estado === col.id);
           const totalColumna = leadsColumna.reduce((sum, l) => sum + (l.monto_clp || 0), 0);
           const isOver = dragOverCol === col.id;
@@ -206,12 +210,12 @@ export default function KanbanBoard({
                   : 'border-white/[0.06]'
               }`}
             >
-              {/* Header de Columna */}
+              {/* Header de Columna Dinámica */}
               <div className="p-3.5 border-b border-white/[0.06] flex items-center justify-between flex-shrink-0 bg-[#0C0F17]">
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${col.dotColor}`} />
-                  <span className="text-xs font-bold tracking-tight text-slate-200">
-                    {col.label}
+                  <div className={`w-2 h-2 rounded-full ${col.dotColor || 'bg-blue-500'}`} />
+                  <span className="text-xs font-bold tracking-tight text-slate-200 truncate">
+                    {col.nombre}
                   </span>
                 </div>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/[0.04] text-slate-400">
@@ -219,14 +223,14 @@ export default function KanbanBoard({
                 </span>
               </div>
 
-              {/* Subtotal en CLP si hay montos */}
+              {/* Subtotal en CLP */}
               {totalColumna > 0 && (
                 <div className="px-3.5 py-1 bg-white/[0.02] border-b border-white/[0.04] text-[11px] font-semibold text-emerald-400 text-right">
                   ${totalColumna.toLocaleString('es-CL')} CLP
                 </div>
               )}
 
-              {/* Lista de Tarjetas (Scroll limpio y ajustado) */}
+              {/* Lista de Tarjetas (Drop Zone) */}
               <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2.5 space-y-2.5">
                 {leadsColumna.length === 0 ? (
                   <div className="h-28 border border-dashed border-white/[0.06] rounded-xl flex items-center justify-center text-xs text-slate-600 font-medium">

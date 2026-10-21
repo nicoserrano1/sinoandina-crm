@@ -1,11 +1,10 @@
-export type LeadStatus = 
-  | 'Nuevo' 
-  | 'Contactado' 
-  | 'Seguimiento' 
-  | 'En Reunión' 
-  | 'Cotizado' 
-  | 'Cerrado Ganado' 
-  | 'Descartado';
+export type LeadStatus = string;
+
+export interface PipelineEtapa {
+  id: string;
+  nombre: string;
+  dotColor?: string;
+}
 
 export interface Lead {
   id: string;

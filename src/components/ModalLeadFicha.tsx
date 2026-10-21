@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Save, Trash2, Building2 } from 'lucide-react';
-import { Lead, LeadStatus } from '@/lib/types';
+import { Lead, LeadStatus, PipelineEtapa } from '@/lib/types';
 
 interface ModalLeadFichaProps {
   lead: Lead | null;
@@ -10,6 +10,7 @@ interface ModalLeadFichaProps {
   onClose: () => void;
   onLeadActualizado: (lead: Lead) => void;
   onLeadDescartado: (id: string) => void;
+  etapas?: PipelineEtapa[];
 }
 
 const ESTADOS_DISPONIBLES: LeadStatus[] = [
@@ -27,7 +28,8 @@ export default function ModalLeadFicha({
   isOpen,
   onClose,
   onLeadActualizado,
-  onLeadDescartado
+  onLeadDescartado,
+  etapas
 }: ModalLeadFichaProps) {
   const [decisor, setDecisor] = useState('');
   const [cargo, setCargo] = useState('');
@@ -88,7 +90,7 @@ export default function ModalLeadFicha({
   };
 
   const handleDescartar = async () => {
-    if (!confirm('¿Deseas descartar este prospecto del pipeline activo?')) return;
+    if (!confirm('¿Deseas descartar este prospecto del pipeline comercial?')) return;
     setLoading(true);
     try {
       const res = await fetch('/api/leads', {
@@ -113,13 +115,13 @@ export default function ModalLeadFicha({
 
   return (
     <div className="fixed inset-0 z-50 bg-[#070d19]/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#0c1527] border border-[#1a2744] w-full max-w-lg rounded-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+      <div className="bg-[#0C0F17] border border-white/[0.08] w-full max-w-lg rounded-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#1a2744]">
+        <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-white/[0.06]">
           <div>
             <div className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-blue-500" />
-              <h3 className="text-base font-bold text-white">{lead.empresa}</h3>
+              <Building2 className="w-4 h-4 text-blue-500" />
+              <h3 className="text-sm font-bold text-white">{lead.empresa}</h3>
             </div>
             {lead.url && (
               <a 
@@ -134,9 +136,9 @@ export default function ModalLeadFicha({
           </div>
           <button 
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-[#162238] transition"
+            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/[0.05] transition"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -149,7 +151,7 @@ export default function ModalLeadFicha({
                 type="text"
                 value={decisor}
                 onChange={(e) => setDecisor(e.target.value)}
-                className="w-full bg-[#131f38] border border-[#233458] focus:border-blue-500 rounded-xl px-3.5 py-2 text-sm text-white outline-none transition"
+                className="w-full bg-[#11141D] border border-white/[0.08] focus:border-blue-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
               />
             </div>
             <div>
@@ -158,7 +160,7 @@ export default function ModalLeadFicha({
                 type="text"
                 value={cargo}
                 onChange={(e) => setCargo(e.target.value)}
-                className="w-full bg-[#131f38] border border-[#233458] focus:border-blue-500 rounded-xl px-3.5 py-2 text-sm text-white outline-none transition"
+                className="w-full bg-[#11141D] border border-white/[0.08] focus:border-blue-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
               />
             </div>
           </div>
@@ -170,7 +172,7 @@ export default function ModalLeadFicha({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#131f38] border border-[#233458] focus:border-blue-500 rounded-xl px-3.5 py-2 text-sm text-white outline-none transition"
+                className="w-full bg-[#11141D] border border-white/[0.08] focus:border-blue-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
               />
             </div>
             <div>
@@ -179,7 +181,7 @@ export default function ModalLeadFicha({
                 type="text"
                 value={telefono}
                 onChange={(e) => setTelefono(e.target.value)}
-                className="w-full bg-[#131f38] border border-[#233458] focus:border-blue-500 rounded-xl px-3.5 py-2 text-sm text-white outline-none transition"
+                className="w-full bg-[#11141D] border border-white/[0.08] focus:border-blue-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
               />
             </div>
           </div>
@@ -191,7 +193,7 @@ export default function ModalLeadFicha({
                 type="number"
                 value={monto}
                 onChange={(e) => setMonto(e.target.value)}
-                className="w-full bg-[#131f38] border border-[#233458] focus:border-blue-500 rounded-xl px-3.5 py-2 text-sm text-white outline-none transition"
+                className="w-full bg-[#11141D] border border-white/[0.08] focus:border-blue-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
               />
             </div>
             <div>
@@ -199,11 +201,20 @@ export default function ModalLeadFicha({
               <select
                 value={estado}
                 onChange={(e) => setEstado(e.target.value as LeadStatus)}
-                className="w-full bg-[#131f38] border border-[#233458] focus:border-blue-500 rounded-xl px-3.5 py-2 text-sm text-white outline-none transition"
+                className="w-full bg-[#11141D] border border-white/[0.08] focus:border-blue-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition cursor-pointer"
               >
-                {ESTADOS_DISPONIBLES.map((est) => (
-                  <option key={est} value={est}>{est}</option>
-                ))}
+                {etapas && etapas.length > 0 ? (
+                  <>
+                    {etapas.map((est) => (
+                      <option key={est.id} value={est.id}>{est.nombre}</option>
+                    ))}
+                    <option value="Descartado">Descartado</option>
+                  </>
+                ) : (
+                  ESTADOS_DISPONIBLES.map((est) => (
+                    <option key={est} value={est}>{est}</option>
+                  ))
+                )}
               </select>
             </div>
           </div>
@@ -214,7 +225,7 @@ export default function ModalLeadFicha({
               type="text"
               value={partida}
               onChange={(e) => setPartida(e.target.value)}
-              className="w-full bg-[#131f38] border border-[#233458] focus:border-blue-500 rounded-xl px-3.5 py-2 text-sm text-white outline-none transition"
+              className="w-full bg-[#11141D] border border-white/[0.08] focus:border-blue-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
             />
           </div>
 
@@ -224,24 +235,24 @@ export default function ModalLeadFicha({
               rows={3}
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
-              className="w-full bg-[#131f38] border border-[#233458] focus:border-blue-500 rounded-xl px-3.5 py-2 text-sm text-white outline-none transition resize-none"
+              className="w-full bg-[#11141D] border border-white/[0.08] focus:border-blue-500 rounded-xl p-3 text-xs text-white outline-none transition resize-none"
             />
           </div>
 
-          <div className="pt-3 flex items-center justify-between gap-3 border-t border-[#1a2744]">
+          <div className="pt-3 flex items-center justify-between gap-3 border-t border-white/[0.06]">
             <button
               onClick={handleDescartar}
               disabled={loading}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold transition"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-medium transition"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Descartar Lead</span>
+              <span>Descartar</span>
             </button>
 
             <button
               onClick={handleGuardar}
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md transition disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-sm transition disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
               <span>{loading ? 'Guardando...' : 'Guardar Cambios'}</span>
