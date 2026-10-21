@@ -27,6 +27,7 @@ export default function Home() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [etapas, setEtapas] = useState<PipelineEtapa[]>(ETAPAS_DEFAULT);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Modales
   const [isModalNuevoOpen, setIsModalNuevoOpen] = useState(false);
@@ -34,7 +35,7 @@ export default function Home() {
   const [selectedLeadForEdit, setSelectedLeadForEdit] = useState<Lead | null>(null);
   const [selectedLeadForEmail, setSelectedLeadForEmail] = useState<Lead | null>(null);
 
-  // Cargar etapas personalizadas desde almacenamiento local
+  // Cargar estado de la barra lateral y etapas personalizadas
   useEffect(() => {
     try {
       const guardadas = localStorage.getItem('sinoandina_pipeline_etapas');
@@ -44,10 +45,25 @@ export default function Home() {
           setEtapas(parsed);
         }
       }
+
+      const sidebarSaved = localStorage.getItem('sinoandina_sidebar_collapsed');
+      if (sidebarSaved !== null) {
+        setIsSidebarCollapsed(sidebarSaved === 'true');
+      }
     } catch (e) {
-      console.error('Error cargando etapas locales:', e);
+      console.error('Error cargando configuración local:', e);
     }
   }, []);
+
+  const handleToggleSidebar = (val?: boolean | ((prev: boolean) => boolean)) => {
+    setIsSidebarCollapsed((prev) => {
+      const next = typeof val === 'function' ? val(prev) : typeof val === 'boolean' ? val : !prev;
+      try {
+        localStorage.setItem('sinoandina_sidebar_collapsed', String(next));
+      } catch (e) {}
+      return next;
+    });
+  };
 
   // Cargar leads desde la API de Supabase
   const fetchLeads = async () => {
@@ -180,21 +196,26 @@ export default function Home() {
 
   return (
     <div className="flex h-screen max-h-screen overflow-hidden bg-[#08090C]">
-      {/* Sidebar Lateral */}
+      {/* Sidebar Lateral Colapsable */}
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenNuevoLead={() => setIsModalNuevoOpen(true)}
+        onOpenPersonalizarEtapas={() => setIsModalEtapasOpen(true)}
         totalLeads={metrics.total}
         seguimientosCount={seguimientosCount}
+        isCollapsed={isSidebarCollapsed}
+        setIsCollapsed={handleToggleSidebar}
       />
 
       {/* Área Principal */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* Barra Superior */}
+        {/* Barra Superior con botón de expansión */}
         <HeaderStats
           title={titulosVistas[activeTab] || 'Dashboard'}
           metrics={metrics}
+          isSidebarCollapsed={isSidebarCollapsed}
+          onToggleSidebar={() => handleToggleSidebar()}
         />
 
         {/* Contenido Dinámico */}

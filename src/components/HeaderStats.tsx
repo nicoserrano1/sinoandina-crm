@@ -1,22 +1,38 @@
 'use client';
 
 import React from 'react';
-import { TrendingUp, Users } from 'lucide-react';
+import { TrendingUp, Users, PanelLeftOpen } from 'lucide-react';
 import { PipelineMetrics } from '@/lib/types';
 
 interface HeaderStatsProps {
   title: string;
   metrics: PipelineMetrics;
+  isSidebarCollapsed?: boolean;
+  onToggleSidebar?: () => void;
 }
 
-export default function HeaderStats({ title, metrics }: HeaderStatsProps) {
+export default function HeaderStats({ 
+  title, 
+  metrics,
+  isSidebarCollapsed,
+  onToggleSidebar
+}: HeaderStatsProps) {
   const formatearMonto = (num: number) => {
     return '$' + num.toLocaleString('es-CL') + ' CLP';
   };
 
   return (
-    <header className="h-14 border-b border-white/[0.06] bg-[#08090C] flex items-center justify-between px-7 flex-shrink-0">
+    <header className="h-14 border-b border-white/[0.06] bg-[#08090C] flex items-center justify-between px-5 flex-shrink-0">
       <div className="flex items-center gap-3">
+        {isSidebarCollapsed && onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.05] border border-white/[0.06] transition"
+            title="Expandir barra lateral"
+          >
+            <PanelLeftOpen className="w-4 h-4" />
+          </button>
+        )}
         <h2 className="text-sm font-bold text-white tracking-tight">{title}</h2>
       </div>
 
