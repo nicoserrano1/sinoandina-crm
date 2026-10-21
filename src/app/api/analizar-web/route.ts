@@ -1,13 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
-
-const MODEL_NAME = "gemini-3.8-flash";
-
-function getApiKey(): string {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) throw new Error("Falta configurar GEMINI_API_KEY en variables de entorno.");
-  return key;
-}
+import { callGeminiWithFallback, extractCleanJson } from '@/lib/gemini';
 
 export async function POST(req: Request) {
   try {
@@ -15,7 +7,7 @@ export async function POST(req: Request) {
 
     if (!url && !descripcion) {
       return NextResponse.json({ 
-        error: 'Debes proporcionar una URL o una descripción de tu negocio/oferta.' 
+        error: 'Debes ingresar un sitio web de referencia o una descripción del negocio.' 
       }, { status: 400 });
     }
 
@@ -31,7 +23,7 @@ export async function POST(req: Request) {
 
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
 
         const response = await fetch(targetUrl, {
           headers: {
@@ -55,7 +47,7 @@ export async function POST(req: Request) {
             .replace(/<[^>]+>/g, ' ')
             .replace(/\s+/g, ' ')
             .trim()
-            .slice(0, 4500);
+            .slice(0, 3500);
 
           webContent = `Título: ${titleMatch ? titleMatch[1] : ''}\nMeta Descripción: ${metaMatch ? metaMatch[1] : ''}\nTexto extraído: ${cleanText}`;
         }
@@ -67,36 +59,31 @@ export async function POST(req: Request) {
 
     // Si se envió descripción directa, sumarla al contexto
     if (descripcion && typeof descripcion === 'string') {
-      webContent = `${webContent ? webContent + '\n\n' : ''}Descripción del usuario sobre su oferta:\n"${descripcion.trim()}"`;
+      webContent = `${webContent ? webContent + '\n\n' : ''}Descripción del usuario sobre la oferta/referencia:\n"${descripcion.trim()}"`;
     }
 
-    const apiKey = getApiKey();
-    const ai = new GoogleGenAI({ apiKey });
-
     const prompt = `
-Actúa como director global de inteligencia de mercado B2B, prospección multicanal y estrategia de ventas corporativas.
-Tu objetivo es analizar cualquier empresa o propuesta de valor (sin importar su industria: software, salud, servicios legales, manufactura, importación, agencias, logística, retail, educación, construcción, etc.) y diseñar un plan de prospección comercial 100% a medida.
-
-Contexto de la empresa o sitio web a analizar:
+Actúa como director global de inteligencia de mercado B2B y prospección corporativa.
+Analiza la siguiente referencia de mercado (puede ser el sitio web de la empresa, un competidor líder a emular, o un cliente modelo):
 ${webContent}
 
-Instrucciones:
-1. Resumen de la oferta: Qué vende, cuál es el valor diferencial y a qué mercado apunta.
-2. Perfil de Cliente Ideal (ICP): Qué tipo de empresas compran esta oferta y por qué.
-3. Tomadores de Decisión: 4 a 6 cargos o roles específicos que tienen el presupuesto y poder de compra para este servicio/producto en particular (ej. en software puede ser CTO o CISO; en salud puede ser Director Médico; en logística puede ser Gerente de Operaciones; en educación puede ser Vicerrector; en construcción puede ser Jefe de Compras).
-4. Ángulos de Búsqueda y Scraping: 6 ángulos de prospección diversos, cada uno atacando un segmento distinto del mercado para que el usuario tenga múltiples opciones donde prospectar:
-   - "Corporativos / Grandes Cuentas"
-   - "Empresas Medianas en Expansión"
-   - "Nicho Específico / Alta Demanda"
-   - "Oportunidad Geográfica / Regional"
-   - "Industria Adyacente / Clientes No Obvios"
-   - "Sustitución de Proveedores Actuales"
+Tu misión es identificar quiénes son los compradores B2B y qué cargos deciden la compra.
+Genera un análisis en formato JSON estricto con:
+1. "empresa_detectada": Nombre de la empresa o concepto central.
+2. "propuesta_valor": Qué producto o servicio ofrece en 1 frase directa.
+3. "perfil_cliente_ideal": Quiénes son las empresas u organizaciones que compran esta solución y por qué.
+4. "decisores_sugeridos": Lista de 4 a 6 cargos específicos con poder de compra (ej: "Jefe de Adquisiciones", "Gerente de Operaciones", "Director Médico", "CTO", "Gerente de Finanzas", etc.).
+5. "angulos_prospeccion": Lista de 4 opciones de búsqueda concretas y variadas:
+   - "Grandes Corporativos / Cuentas Clave"
+   - "Empresas Medianas en Crecimiento"
+   - "Nicho de Máxima Urgencia"
+   - "Oportunidad Territorial / Regional"
 
-Devuelve ÚNICAMENTE un JSON válido con la siguiente estructura:
+Devuelve ÚNICAMENTE un JSON válido con esta estructura:
 {
-  "empresa_detectada": "Nombre o concepto de la empresa",
-  "propuesta_valor": "Resumen claro de la propuesta de valor (máx 25 palabras)",
-  "perfil_cliente_ideal": "Quiénes son los clientes ideales que compran esta solución",
+  "empresa_detectada": "Nombre o rubro de referencia",
+  "propuesta_valor": "Resumen claro de la propuesta de valor",
+  "perfil_cliente_ideal": "Quiénes compran esta solución",
   "decisores_sugeridos": [
     "Cargo 1 específico",
     "Cargo 2 específico",
@@ -105,49 +92,35 @@ Devuelve ÚNICAMENTE un JSON válido con la siguiente estructura:
   ],
   "angulos_prospeccion": [
     {
-      "enfoque": "Corporativos",
+      "enfoque": "Grandes Corporativos",
       "query": "Búsqueda concreta para encontrar empresas",
       "justificacion": "Por qué este segmento tiene presupuesto"
     },
     {
-      "enfoque": "Empresas Medianas",
+      "enfoque": "Empresas Medianas en Crecimiento",
       "query": "Búsqueda concreta para encontrar empresas",
-      "justificacion": "Por qué es una venta más ágil"
+      "justificacion": "Ciclo de venta más corto y ágil"
     },
     {
-      "enfoque": "Nicho de Alta Demanda",
+      "enfoque": "Nicho de Máxima Urgencia",
       "query": "Búsqueda concreta para encontrar empresas",
-      "justificacion": "Por qué necesitan esta solución con urgencia"
+      "justificacion": "Alta necesidad inmediata de resolver este problema"
     },
     {
-      "enfoque": "Regional / Territorial",
+      "enfoque": "Oportunidad Territorial",
       "query": "Búsqueda concreta para encontrar empresas",
-      "justificacion": "Oportunidad por concentración geográfica"
-    },
-    {
-      "enfoque": "Industria Adyacente",
-      "query": "Búsqueda concreta para encontrar empresas",
-      "justificacion": "Segmento poco explotado por la competencia"
-    },
-    {
-      "enfoque": "Sustitución de Proveedor",
-      "query": "Búsqueda concreta para encontrar empresas",
-      "justificacion": "Empresas insatisfechas con alternativas caras"
+      "justificacion": "Concentración por área geográfica"
     }
   ]
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: MODEL_NAME,
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        temperature: 0.25
-      }
-    });
+    const rawText = await callGeminiWithFallback(prompt, true);
+    const parsed = extractCleanJson(rawText);
 
-    const parsed = JSON.parse(response.text || "{}");
+    if (!parsed) {
+      throw new Error("No se pudo interpretar la respuesta de la IA.");
+    }
 
     return NextResponse.json({
       success: true,
@@ -157,6 +130,8 @@ Devuelve ÚNICAMENTE un JSON válido con la siguiente estructura:
 
   } catch (err: any) {
     console.error("Error en /api/analizar-web:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ 
+      error: "El servicio de IA tardó en responder. Por favor intenta de nuevo en unos segundos." 
+    }, { status: 500 });
   }
 }
