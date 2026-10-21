@@ -21,121 +21,80 @@ export default function ColmenaLogo({
   };
 
   return (
-    <div className={`flex items-center gap-2.5 ${className}`}>
+    <div className={`flex items-center gap-3 ${className}`}>
       <div className={`relative ${sizeMap[size]} flex items-center justify-center flex-shrink-0`}>
-        {/* Glow cálido ambiental */}
-        <div className="absolute inset-0 bg-amber-500/20 rounded-full blur-md" />
-        
-        {/* Isotipo: Abeja Exploradora Geométrica (Scout Bee) */}
+        {/* Isotipo 100% Plano Minimalista (Flat Vector Scout Bee) */}
         <svg 
           viewBox="0 0 100 100" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full relative z-10 drop-shadow-[0_2px_12px_rgba(245,158,11,0.45)]"
+          className="w-full h-full relative z-10"
         >
-          <defs>
-            {/* Gradientes dorados y ámbar de alta definición */}
-            <linearGradient id="scout-gold-light" x1="20" y1="20" x2="80" y2="80" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#FDE68A" />
-              <stop offset="0.5" stopColor="#F59E0B" />
-              <stop offset="1" stopColor="#D97706" />
-            </linearGradient>
-
-            <linearGradient id="scout-gold-dark" x1="40" y1="30" x2="80" y2="90" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#D97706" />
-              <stop offset="1" stopColor="#78350F" />
-            </linearGradient>
-
-            <linearGradient id="wing-primary" x1="15" y1="20" x2="65" y2="50" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#FDE68A" />
-              <stop offset="0.6" stopColor="#F59E0B" />
-              <stop offset="1" stopColor="#B45309" />
-            </linearGradient>
-
-            <linearGradient id="wing-secondary" x1="25" y1="35" x2="60" y2="55" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#F59E0B" />
-              <stop offset="1" stopColor="#92400E" />
-            </linearGradient>
-          </defs>
-
-          {/* Ala Superior Principal (Facetada Aerodinámica) */}
+          {/* Ala Superior (Blanco Puro Stark White) */}
           <path 
-            d="M 58 43 L 15 25 L 35 48 L 56 47 Z" 
-            fill="url(#wing-primary)" 
-            stroke="#FFFBEB" 
-            strokeWidth="0.8" 
-            strokeLinejoin="round" 
+            d="M 15 30 L 48 40 L 29 49 L 14 49 Z" 
+            fill="#FFFFFF" 
           />
 
-          {/* Ala Secundaria (Sombra y Profundidad) */}
+          {/* Ala Inferior (Blanco Puro Stark White) */}
           <path 
-            d="M 55 49 L 23 45 L 42 60 L 53 53 Z" 
-            fill="url(#wing-secondary)" 
-            stroke="#FEF3C7" 
-            strokeWidth="0.8" 
-            strokeLinejoin="round" 
+            d="M 14 51 L 32 51 L 19 63 L 14 63 Z" 
+            fill="#FFFFFF" 
           />
 
-          {/* Cabeza & Antenas de Radar */}
+          {/* Antenas de Radar (Ámbar Eléctrico) */}
           <path 
-            d="M 72 38 L 84 41 L 79 50 L 69 44 Z" 
-            fill="url(#scout-gold-light)" 
-            stroke="#FFFBEB" 
-            strokeWidth="0.8" 
+            d="M 70 34 L 75 30 L 80 30" 
+            stroke="#FFB800" 
+            strokeWidth="3.2" 
+            strokeLinecap="round" 
             strokeLinejoin="round" 
           />
-          {/* Antena estilizada */}
           <path 
-            d="M 80 40 L 89 36 L 93 39" 
-            stroke="#FDE68A" 
-            strokeWidth="1.8" 
+            d="M 73 39 L 79 36 L 83 37" 
+            stroke="#FFB800" 
+            strokeWidth="3" 
             strokeLinecap="round" 
             strokeLinejoin="round" 
           />
 
-          {/* Tórax Central Facetado */}
+          {/* Cabeza Geométrica (Ámbar Eléctrico) */}
           <path 
-            d="M 57 44 L 69 44 L 66 58 L 55 56 Z" 
-            fill="url(#scout-gold-light)" 
-            stroke="#FEF3C7" 
-            strokeWidth="0.8" 
-            strokeLinejoin="round" 
+            d="M 64 36 L 73 39 L 76 49 L 68 49 L 63 43 Z" 
+            fill="#FFB800" 
           />
 
-          {/* Pata / Gancho de Precisión */}
+          {/* Tórax Central (Ámbar Eléctrico) */}
           <path 
-            d="M 64 56 L 68 64 L 62 67" 
-            stroke="#F59E0B" 
-            strokeWidth="1.6" 
+            d="M 52 42 L 67 43 L 67 56 L 56 61 L 52 53 Z" 
+            fill="#FFB800" 
+          />
+
+          {/* Pata Estilizada / Vector de Apoyo */}
+          <path 
+            d="M 60 58 L 65 64 L 61 68" 
+            stroke="#FFB800" 
+            strokeWidth="3.5" 
             strokeLinecap="round" 
             strokeLinejoin="round" 
           />
 
-          {/* Abdomen Segmentado - Franja 1 */}
+          {/* Abdomen - Franja 1 */}
           <path 
-            d="M 55 57 L 50 51 L 44 60 L 50 67 Z" 
-            fill="url(#scout-gold-light)" 
-            stroke="#FEF3C7" 
-            strokeWidth="0.8" 
-            strokeLinejoin="round" 
+            d="M 49 52 L 54 60 L 46 68 L 41 60 Z" 
+            fill="#FFB800" 
           />
 
-          {/* Abdomen Segmentado - Franja 2 */}
+          {/* Abdomen - Franja 2 */}
           <path 
-            d="M 48 65 L 43 59 L 37 68 L 42 75 Z" 
-            fill="url(#scout-gold-dark)" 
-            stroke="#FDE68A" 
-            strokeWidth="0.8" 
-            strokeLinejoin="round" 
+            d="M 39 62 L 44 70 L 36 78 L 31 70 Z" 
+            fill="#FFB800" 
           />
 
-          {/* Abdomen Segmentado - Franja 3 / Aguijón de Cierre */}
+          {/* Abdomen - Aguijón Terminal de Cierre */}
           <path 
-            d="M 41 74 L 36 68 L 30 75 L 34 83 C 35 84, 38 82, 41 74 Z" 
-            fill="url(#scout-gold-light)" 
-            stroke="#FFFBEB" 
-            strokeWidth="0.8" 
-            strokeLinejoin="round" 
+            d="M 30 72 L 34 80 L 22 83 Z" 
+            fill="#FFB800" 
           />
         </svg>
       </div>
@@ -143,12 +102,12 @@ export default function ColmenaLogo({
       {showText && (
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-white text-sm tracking-widest uppercase leading-none truncate">
+            <span className="font-black text-white text-base tracking-wider uppercase leading-none truncate">
               Colmena
             </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block shadow-[0_0_8px_#f59e0b]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FFB800] inline-block" />
           </div>
-          <span className="text-[9px] text-amber-400/90 font-bold tracking-widest uppercase mt-1 truncate">
+          <span className="text-[9px] text-[#FFB800] font-bold tracking-widest uppercase mt-1 truncate">
             Commercial Intelligence
           </span>
         </div>
