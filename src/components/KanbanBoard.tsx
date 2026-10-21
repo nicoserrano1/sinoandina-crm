@@ -20,13 +20,13 @@ interface KanbanBoardProps {
   onRefresh: () => void;
 }
 
-const COLUMNAS: { id: LeadStatus; label: string; emoji: string; color: string }[] = [
-  { id: 'Nuevo', label: 'Nuevos', emoji: '🆕', color: 'text-blue-400' },
-  { id: 'Contactado', label: 'Contactados', emoji: '✉️', color: 'text-amber-400' },
-  { id: 'Seguimiento', label: 'Seguimiento', emoji: '🔄', color: 'text-orange-400' },
-  { id: 'En Reunión', label: 'En Reunión', emoji: '🤝', color: 'text-purple-400' },
-  { id: 'Cotizado', label: 'Cotizado', emoji: '📝', color: 'text-pink-400' },
-  { id: 'Cerrado Ganado', label: 'Ganado', emoji: '🏆', color: 'text-emerald-400' },
+const COLUMNAS: { id: LeadStatus; label: string; emoji: string; color: string; dotColor: string }[] = [
+  { id: 'Nuevo', label: 'Nuevos', emoji: '🆕', color: 'text-blue-400', dotColor: 'bg-blue-500' },
+  { id: 'Contactado', label: 'Contactados', emoji: '✉️', color: 'text-amber-400', dotColor: 'bg-amber-500' },
+  { id: 'Seguimiento', label: 'Seguimiento', emoji: '🔄', color: 'text-orange-400', dotColor: 'bg-orange-500' },
+  { id: 'En Reunión', label: 'En Reunión', emoji: '🤝', color: 'text-purple-400', dotColor: 'bg-purple-500' },
+  { id: 'Cotizado', label: 'Cotizado', emoji: '📝', color: 'text-pink-400', dotColor: 'bg-pink-500' },
+  { id: 'Cerrado Ganado', label: 'Ganado', emoji: '🏆', color: 'text-emerald-400', dotColor: 'bg-emerald-500' },
 ];
 
 export default function KanbanBoard({
@@ -105,11 +105,11 @@ export default function KanbanBoard({
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col min-h-0 overflow-hidden">
       {/* Kanban Toolbar Pro */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 flex-shrink-0">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3.5 flex-shrink-0">
         {/* Buscador reactivo */}
-        <div className="relative flex-1 min-w-[280px] max-w-md">
+        <div className="relative flex-1 min-w-[260px] max-w-sm">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -153,7 +153,7 @@ export default function KanbanBoard({
           <select
             value={orden}
             onChange={(e) => setOrden(e.target.value as any)}
-            className="bg-[#0E1017] border border-white/10 text-slate-300 text-xs rounded-xl px-3 py-1.5 outline-none"
+            className="bg-[#0E1017] border border-white/10 text-slate-300 text-xs rounded-xl px-3 py-1.5 outline-none cursor-pointer"
           >
             <option value="recientes">Recientes primero</option>
             <option value="mayor_monto">Mayor Monto ($)</option>
@@ -179,8 +179,8 @@ export default function KanbanBoard({
         </div>
       </div>
 
-      {/* Grid de Columnas Kanban con Drag & Drop Nativo */}
-      <div className="flex-1 grid grid-cols-6 gap-3.5 overflow-x-auto min-w-[1240px] pb-4">
+      {/* Grid de Columnas Kanban: 100% Ajustado a la pantalla con ancho óptimo */}
+      <div className="flex-1 flex gap-3.5 overflow-x-auto overflow-y-hidden min-h-0 pb-1">
         {COLUMNAS.map((col) => {
           const leadsColumna = leadsFiltrados.filter((l) => l.estado === col.id);
           const totalColumna = leadsColumna.reduce((sum, l) => sum + (l.monto_clp || 0), 0);
@@ -202,14 +202,14 @@ export default function KanbanBoard({
                 }
                 setDragOverCol(null);
               }}
-              className={`glass-panel rounded-2xl flex flex-col max-h-full overflow-hidden transition-all duration-200 ${
+              className={`w-[290px] min-w-[290px] max-w-[290px] flex-shrink-0 glass-panel rounded-2xl flex flex-col h-full overflow-hidden transition-all duration-200 ${
                 isOver ? 'kanban-dropzone-active border-dashed border-2' : ''
               }`}
             >
               {/* Header de Columna */}
-              <div className="p-3.5 border-b border-white/5 flex items-center justify-between flex-shrink-0 bg-[#0E1017]/80">
+              <div className="p-3.5 border-b border-white/5 flex items-center justify-between flex-shrink-0 bg-[#0E1017]/90">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">{col.emoji}</span>
+                  <div className={`w-2 h-2 rounded-full ${col.dotColor}`} />
                   <span className={`text-xs font-extrabold tracking-wide uppercase ${col.color}`}>
                     {col.label}
                   </span>
@@ -221,17 +221,17 @@ export default function KanbanBoard({
 
               {/* Subtotal en CLP si hay montos en la columna */}
               {totalColumna > 0 && (
-                <div className="px-3 py-1 bg-emerald-500/5 border-b border-emerald-500/10 text-[10px] font-extrabold text-emerald-400 text-right">
+                <div className="px-3.5 py-1 bg-emerald-500/5 border-b border-emerald-500/10 text-[11px] font-extrabold text-emerald-400 text-right">
                   ${totalColumna.toLocaleString('es-CL')} CLP
                 </div>
               )}
 
-              {/* Lista de Tarjetas / Drop Zone */}
-              <div className="flex-1 p-2.5 overflow-y-auto space-y-2.5">
+              {/* Lista de Tarjetas / Drop Zone (Scroll suave y libre de scrollbars dobles) */}
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 space-y-3">
                 {leadsColumna.length === 0 ? (
-                  <div className="h-32 border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center text-xs text-slate-500 font-medium p-4 text-center">
-                    <span className="text-lg opacity-40 mb-1">📥</span>
-                    <span>Arrastra una tarjeta aquí</span>
+                  <div className="h-28 border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center text-xs text-slate-500 font-medium p-3 text-center">
+                    <span className="text-base opacity-40 mb-1">📥</span>
+                    <span className="text-[11px]">Arrastra una tarjeta aquí</span>
                   </div>
                 ) : (
                   leadsColumna.map((lead) => (
