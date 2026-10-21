@@ -5,14 +5,14 @@ import { Lead } from '@/lib/types';
 
 export async function POST(req: Request) {
   try {
-    const { criterio, limite = 10, decisorTipo } = await req.json();
+    const { criterio, limite = 10, decisorTipo, contextoOferta } = await req.json();
 
     if (!criterio || typeof criterio !== 'string') {
       return NextResponse.json({ error: 'Criterio de búsqueda es requerido' }, { status: 400 });
     }
 
-    // Ejecutar inteligencia comercial con Gemini 3.8 Flash
-    const empresasEncontradas = await buscarEmpresasB2B(criterio, limite, decisorTipo);
+    // Ejecutar inteligencia comercial y scraping con Gemini 3.8 Flash
+    const empresasEncontradas = await buscarEmpresasB2B(criterio, limite, decisorTipo, contextoOferta);
 
     if (!empresasEncontradas || empresasEncontradas.length === 0) {
       return NextResponse.json({ 
@@ -33,9 +33,9 @@ export async function POST(req: Request) {
         cargo: emp.cargo || "Gerente de Adquisiciones",
         telefono: emp.telefono || "",
         monto_clp: 0,
-        partida: "",
+        partida: emp.partida || "",
         estado: "Nuevo",
-        notas: `Prospectado automáticamente con IA para sector: ${criterio}`
+        notas: emp.por_que_es_match || `Prospectado automáticamente para: ${criterio}`
       }));
 
       const { data, error } = await supabase
@@ -59,9 +59,9 @@ export async function POST(req: Request) {
         cargo: emp.cargo || "Gerente de Adquisiciones",
         telefono: emp.telefono || "",
         monto_clp: 0,
-        partida: "",
+        partida: emp.partida || "",
         estado: "Nuevo" as const,
-        notas: `Prospectado con IA para: ${criterio}`,
+        notas: emp.por_que_es_match || `Prospectado para: ${criterio}`,
         created_at: new Date().toISOString()
       }));
     }

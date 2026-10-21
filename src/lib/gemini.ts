@@ -9,23 +9,32 @@ function getApiKey(): string {
   return key;
 }
 
-export async function buscarEmpresasB2B(query: string, limite: number = 10, decisorTipo?: string) {
+export async function buscarEmpresasB2B(
+  query: string, 
+  limite: number = 10, 
+  decisorTipo?: string,
+  contextoOferta?: string
+) {
   const apiKey = getApiKey();
   const ai = new GoogleGenAI({ apiKey });
 
   const prompt = `
-Actúa como director de inteligencia comercial B2B para una empresa que busca cerrar acuerdos de alto valor.
-Tu objetivo es encontrar ${limite} empresas u organizaciones comerciales reales, activas y líderes operando en el siguiente sector: "${query}".
+Actúa como director de inteligencia comercial B2B y scraping web corporativo para una empresa que busca cerrar acuerdos comerciales de alto valor.
+Tu objetivo es encontrar ${limite} empresas u organizaciones comerciales reales, activas y líderes operando en el siguiente sector o búsqueda: "${query}".
+
+${contextoOferta ? `Contexto de la empresa oferente / propuesta de valor: "${contextoOferta}". Prioriza empresas que tengan necesidad directa de este tipo de oferta.` : ""}
 
 Perfil del tomador de decisión requerido: ${decisorTipo || "Jefatura de Compras / Abastecimiento o Gerencia General"}.
 
-Para cada empresa entrega:
-- nombre: Nombre oficial de la empresa.
+Para cada empresa entrega información comercial verificable en Chile / Latam:
+- nombre: Nombre comercial oficial.
 - url: Sitio web oficial (https://...).
 - tomador_decision: Nombre de la persona o jefatura específica del área.
-- cargo: Cargo exacto.
+- cargo: Cargo exacto del decisor.
 - email: Correo departamental o corporativo de contacto (ej: adquisiciones@dominio.cl, compras@dominio.cl, contacto@...).
-- telefono: Teléfono de contacto en formato chileno (+56 9 XXXX XXXX o +56 2 XXXX XXXX) si está disponible o estimado corporativo.
+- telefono: Teléfono de contacto en formato chileno (+56 9 XXXX XXXX o +56 2 XXXX XXXX).
+- partida: Partida o área de compra estimada (ej: "Terminaciones y Revestimientos", "Cubicaciones", "Climatización", "Materiales de Obra Gruesa", "Suministros Industriales").
+- por_que_es_match: Una frase corta de por qué es una excelente oportunidad comercial.
 
 Devuelve ÚNICAMENTE un JSON válido con la estructura:
 {
@@ -36,7 +45,9 @@ Devuelve ÚNICAMENTE un JSON válido con la estructura:
       "tomador_decision": "Juan Pérez",
       "cargo": "Gerente de Adquisiciones",
       "email": "adquisiciones@empresa.cl",
-      "telefono": "+56 9 8765 4321"
+      "telefono": "+56 9 8765 4321",
+      "partida": "Terminaciones",
+      "por_que_es_match": "Constructora activa con proyectos habitacionales en la Región Metropolitana."
     }
   ]
 }
