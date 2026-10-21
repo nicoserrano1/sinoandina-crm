@@ -1,0 +1,235 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import Sidebar from '@/components/Sidebar';
+import HeaderStats from '@/components/HeaderStats';
+import KanbanBoard from '@/components/KanbanBoard';
+import ProspectorPanel from '@/components/ProspectorPanel';
+import SeguimientosPanel from '@/components/SeguimientosPanel';
+import TableView from '@/components/TableView';
+import PlanesPanel from '@/components/PlanesPanel';
+import ModalNuevoLead from '@/components/ModalNuevoLead';
+import ModalLeadFicha from '@/components/ModalLeadFicha';
+import ModalEnviarCorreo from '@/components/ModalEnviarCorreo';
+import { Lead, LeadStatus, PipelineMetrics } from '@/lib/types';
+
+export default function Home() {
+  const [activeTab, setActiveTab] = useState('kanban');
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [creditos, setCreditos] = useState(250);
+
+  // Modales
+  const [isModalNuevoOpen, setIsModalNuevoOpen] = useState(false);
+  const [selectedLeadForEdit, setSelectedLeadForEdit] = useState<Lead | null>(null);
+  const [selectedLeadForEmail, setSelectedLeadForEmail] = useState<Lead | null>(null);
+
+  // Cargar leads desde la API
+  const fetchLeads = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/leads');
+      const data = await res.json();
+      if (data.leads) {
+        setLeads(data.leads);
+      }
+    } catch (err) {
+      console.error('Error cargando leads:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
+  // Calcular métricas del Pipeline
+  const metrics: PipelineMetrics = React.useMemo(() => {
+    const m = {
+      total: 0,
+      nuevos: 0,
+      contactados: 0,
+      seguimiento: 0,
+      reunion: 0,
+      cotizados: 0,
+      ganados: 0,
+      descartados: 0,
+      valorPipeline: 0,
+      creditosDisponibles: creditos
+    };
+
+    leads.forEach((l) => {
+      if (l.estado === 'Descartado') {
+        m.descartados++;
+        return;
+      }
+
+      m.total++;
+      if (l.estado === 'Nuevo') m.nuevos++;
+      else if (l.estado === 'Contactado') m.contactados++;
+      else if (l.estado === 'Seguimiento') m.seguimiento++;
+      else if (l.estado === 'En Reunión') m.reunion++;
+      else if (l.estado === 'Cotizado') m.cotizados++;
+      else if (l.estado === 'Cerrado Ganado') m.ganados++;
+
+      m.valorPipeline += Number(l.monto_clp) || 0;
+    });
+
+    return m;
+  }, [leads, creditos]);
+
+  // Manejadores de Estado
+  const handleMoverEstado = async (id: string, nuevoEstado: LeadStatus) => {
+    // Actualización optimista en UI
+    setLeads((prev) =>
+      prev.map((l) => (l.id === id ? { ...l, estado: nuevoEstado } : l))
+    );
+
+    try {
+      await fetch('/api/leads', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, estado: nuevoEstado })
+      });
+    } catch (err) {
+      console.error('Error actualizando estado:', err);
+    }
+  };
+
+  const handleLeadCreado = (nuevoLead: Lead) => {
+    setLeads((prev) => [nuevoLead, ...prev]);
+  };
+
+  const handleLeadActualizado = (leadActualizado: Lead) => {
+    setLeads((prev) =>
+      prev.map((l) => (l.id === leadActualizado.id ? leadActualizado : l))
+    );
+  };
+
+  const handleLeadDescartado = (id: string) => {
+    setLeads((prev) =>
+      prev.map((l) => (l.id === id ? { ...l, estado: 'Descartado' } : l))
+    );
+  };
+
+  const handleLeadsAgregadosPorProspector = (nuevosLeads: Lead[]) => {
+    setLeads((prev) => [...nuevosLeads, ...prev]);
+    setActiveTab('kanban');
+  };
+
+  const handleDescontarCreditos = (cantidad: number) => {
+    setCreditos((prev) => Math.max(0, prev - cantidad));
+  };
+
+  const handleRecargarCreditos = (cantidad: number) => {
+    setCreditos((prev) => prev + cantidad);
+  };
+
+  const handleEmailEnviado = (leadId: string) => {
+    handleMoverEstado(leadId, 'Contactado');
+  };
+
+  // Conteo de seguimientos pendientes (>3 días)
+  const seguimientosCount = React.useMemo(() => {
+    return leads.filter((l) => {
+      const diffDays = l.dias_inactivo !== undefined ? l.dias_inactivo : Math.max(0, Math.floor((Date.now() - new Date(l.created_at).getTime()) / (1000 * 60 * 60 * 24)));
+      return (l.estado === 'Contactado' || l.estado === 'Seguimiento') && diffDays >= 3;
+    }).length;
+  }, [leads]);
+
+  const titulosVistas: Record<string, string> = {
+    kanban: '📌 Pipeline Comercial (Kanban)',
+    prospector: '🔍 Prospector B2B Universal con IA',
+    seguimientos: '🔄 Detector de Seguimientos Pendientes',
+    tabla: '📋 Base de Datos de Prospectos',
+    planes: '💎 Planes & Facturación SaaS'
+  };
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-[#070d19]">
+      {/* Sidebar Lateral */}
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onOpenNuevoLead={() => setIsModalNuevoOpen(true)}
+        creditos={creditos}
+        totalLeads={metrics.total}
+        seguimientosCount={seguimientosCount}
+      />
+
+      {/* Área Principal */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Barra Superior con KPIs */}
+        <HeaderStats
+          title={titulosVistas[activeTab] || 'Dashboard'}
+          metrics={metrics}
+        />
+
+        {/* Contenido Dinámico según pestaña */}
+        <main className="flex-1 overflow-y-auto p-6">
+          {activeTab === 'kanban' && (
+            <KanbanBoard
+              leads={leads}
+              onEditLead={(lead) => setSelectedLeadForEdit(lead)}
+              onSendEmail={(lead) => setSelectedLeadForEmail(lead)}
+              onMoverEstado={handleMoverEstado}
+              onRefresh={fetchLeads}
+            />
+          )}
+
+          {activeTab === 'prospector' && (
+            <ProspectorPanel
+              onLeadsAgregados={handleLeadsAgregadosPorProspector}
+              creditos={creditos}
+              onDescontarCreditos={handleDescontarCreditos}
+            />
+          )}
+
+          {activeTab === 'seguimientos' && (
+            <SeguimientosPanel
+              leads={leads}
+              onSendEmail={(lead) => setSelectedLeadForEmail(lead)}
+            />
+          )}
+
+          {activeTab === 'tabla' && (
+            <TableView
+              leads={leads}
+              onEditLead={(lead) => setSelectedLeadForEdit(lead)}
+            />
+          )}
+
+          {activeTab === 'planes' && (
+            <PlanesPanel
+              creditosActuales={creditos}
+              onRecargar={handleRecargarCreditos}
+            />
+          )}
+        </main>
+      </div>
+
+      {/* Modales */}
+      <ModalNuevoLead
+        isOpen={isModalNuevoOpen}
+        onClose={() => setIsModalNuevoOpen(false)}
+        onLeadCreado={handleLeadCreado}
+      />
+
+      <ModalLeadFicha
+        lead={selectedLeadForEdit}
+        isOpen={Boolean(selectedLeadForEdit)}
+        onClose={() => setSelectedLeadForEdit(null)}
+        onLeadActualizado={handleLeadActualizado}
+        onLeadDescartado={handleLeadDescartado}
+      />
+
+      <ModalEnviarCorreo
+        lead={selectedLeadForEmail}
+        isOpen={Boolean(selectedLeadForEmail)}
+        onClose={() => setSelectedLeadForEmail(null)}
+        onEmailEnviado={handleEmailEnviado}
+      />
+    </div>
+  );
+}
