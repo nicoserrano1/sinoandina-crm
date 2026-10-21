@@ -11,90 +11,129 @@ function getApiKey(): string {
 
 export async function POST(req: Request) {
   try {
-    const { url } = await req.json();
+    const { url, descripcion } = await req.json();
 
-    if (!url || typeof url !== 'string') {
-      return NextResponse.json({ error: 'La URL del sitio web es requerida' }, { status: 400 });
-    }
-
-    // Normalizar URL
-    let formattedUrl = url.trim();
-    if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
-      formattedUrl = 'https://' + formattedUrl;
+    if (!url && !descripcion) {
+      return NextResponse.json({ 
+        error: 'Debes proporcionar una URL o una descripción de tu negocio/oferta.' 
+      }, { status: 400 });
     }
 
     let webContent = '';
+    let targetUrl = '';
 
-    // Scraping del sitio web de referencia
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-      const response = await fetch(formattedUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
-        },
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const html = await response.text();
-        
-        // Extraer texto limpio de títulos, metas y párrafos
-        const metaMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i);
-        const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
-        
-        // Remover scripts y estilos
-        const cleanText = html
-          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ')
-          .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ')
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim()
-          .slice(0, 4000); // Primeros 4000 caracteres con contenido relevante
-
-        webContent = `Título: ${titleMatch ? titleMatch[1] : ''}\nMeta Descripción: ${metaMatch ? metaMatch[1] : ''}\nTexto extraído: ${cleanText}`;
-      } else {
-        webContent = `Sitio web: ${formattedUrl} (No respondió código 200, pero infiere por dominio)`;
+    // Si se envió una URL, hacer scraping ligero de contenido
+    if (url && typeof url === 'string' && url.trim()) {
+      targetUrl = url.trim();
+      if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+        targetUrl = 'https://' + targetUrl;
       }
-    } catch (scrapeErr: any) {
-      console.warn("Aviso scraping HTML directo:", scrapeErr.message);
-      webContent = `Sitio web de referencia: ${formattedUrl}`;
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        const response = await fetch(targetUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
+          },
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const html = await response.text();
+          const metaMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i);
+          const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+          
+          const cleanText = html
+            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ')
+            .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 4500);
+
+          webContent = `Título: ${titleMatch ? titleMatch[1] : ''}\nMeta Descripción: ${metaMatch ? metaMatch[1] : ''}\nTexto extraído: ${cleanText}`;
+        }
+      } catch (err: any) {
+        console.warn("Aviso scraping web:", err.message);
+        webContent = `Sitio web de referencia: ${targetUrl}`;
+      }
     }
 
-    // Análisis del modelo comercial con Gemini 3.8 Flash
+    // Si se envió descripción directa, sumarla al contexto
+    if (descripcion && typeof descripcion === 'string') {
+      webContent = `${webContent ? webContent + '\n\n' : ''}Descripción del usuario sobre su oferta:\n"${descripcion.trim()}"`;
+    }
+
     const apiKey = getApiKey();
     const ai = new GoogleGenAI({ apiKey });
 
     const prompt = `
-Actúa como experto en prospección comercial B2B y estrategia de ventas corporativas.
-Analiza el siguiente sitio web de una empresa o cliente de referencia:
-URL: ${formattedUrl}
+Actúa como director global de inteligencia de mercado B2B, prospección multicanal y estrategia de ventas corporativas.
+Tu objetivo es analizar cualquier empresa o propuesta de valor (sin importar su industria: software, salud, servicios legales, manufactura, importación, agencias, logística, retail, educación, construcción, etc.) y diseñar un plan de prospección comercial 100% a medida.
 
-Contenido analizado:
+Contexto de la empresa o sitio web a analizar:
 ${webContent}
 
-Tu misión:
-1. Identificar qué productos o servicios vende esta empresa (su propuesta de valor).
-2. Definir cuál es su PERFIL DE CLIENTE IDEAL (ICP) B2B: ¿Quiénes son las empresas u organizaciones que necesitan contratarla o comprarle?
-3. Generar entre 4 y 6 categorías e ideas EXACTAS de búsqueda para hacer scraping web y encontrar prospectos listos para comprar. Cada categoría debe ser concreta, orientada al mercado chileno o regional (ej: "Constructoras de edificación en altura en Santiago", "Empresas de climatización industrial en RM", "Distribuidores mayoristas de ferretería").
-4. Sugerir el cargo del tomador de decisión clave para esta industria.
+Instrucciones:
+1. Resumen de la oferta: Qué vende, cuál es el valor diferencial y a qué mercado apunta.
+2. Perfil de Cliente Ideal (ICP): Qué tipo de empresas compran esta oferta y por qué.
+3. Tomadores de Decisión: 4 a 6 cargos o roles específicos que tienen el presupuesto y poder de compra para este servicio/producto en particular (ej. en software puede ser CTO o CISO; en salud puede ser Director Médico; en logística puede ser Gerente de Operaciones; en educación puede ser Vicerrector; en construcción puede ser Jefe de Compras).
+4. Ángulos de Búsqueda y Scraping: 6 ángulos de prospección diversos, cada uno atacando un segmento distinto del mercado para que el usuario tenga múltiples opciones donde prospectar:
+   - "Corporativos / Grandes Cuentas"
+   - "Empresas Medianas en Expansión"
+   - "Nicho Específico / Alta Demanda"
+   - "Oportunidad Geográfica / Regional"
+   - "Industria Adyacente / Clientes No Obvios"
+   - "Sustitución de Proveedores Actuales"
 
-Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta:
+Devuelve ÚNICAMENTE un JSON válido con la siguiente estructura:
 {
-  "empresa": "Nombre o rubro de la empresa",
-  "propuesta_valor": "Resumen claro de lo que ofrece en 1 o 2 oraciones",
-  "perfil_cliente_ideal": "Quiénes son sus mejores compradores B2B",
-  "decisor_recomendado": "Jefe de Compras y Abastecimiento / Adquisiciones",
-  "sugerencias_busqueda": [
-    "Categoría 1 con ubicación o nicho específico",
-    "Categoría 2 con ubicación o nicho específico",
-    "Categoría 3 con ubicación o nicho específico",
-    "Categoría 4 con ubicación o nicho específico"
+  "empresa_detectada": "Nombre o concepto de la empresa",
+  "propuesta_valor": "Resumen claro de la propuesta de valor (máx 25 palabras)",
+  "perfil_cliente_ideal": "Quiénes son los clientes ideales que compran esta solución",
+  "decisores_sugeridos": [
+    "Cargo 1 específico",
+    "Cargo 2 específico",
+    "Cargo 3 específico",
+    "Cargo 4 específico"
+  ],
+  "angulos_prospeccion": [
+    {
+      "enfoque": "Corporativos",
+      "query": "Búsqueda concreta para encontrar empresas",
+      "justificacion": "Por qué este segmento tiene presupuesto"
+    },
+    {
+      "enfoque": "Empresas Medianas",
+      "query": "Búsqueda concreta para encontrar empresas",
+      "justificacion": "Por qué es una venta más ágil"
+    },
+    {
+      "enfoque": "Nicho de Alta Demanda",
+      "query": "Búsqueda concreta para encontrar empresas",
+      "justificacion": "Por qué necesitan esta solución con urgencia"
+    },
+    {
+      "enfoque": "Regional / Territorial",
+      "query": "Búsqueda concreta para encontrar empresas",
+      "justificacion": "Oportunidad por concentración geográfica"
+    },
+    {
+      "enfoque": "Industria Adyacente",
+      "query": "Búsqueda concreta para encontrar empresas",
+      "justificacion": "Segmento poco explotado por la competencia"
+    },
+    {
+      "enfoque": "Sustitución de Proveedor",
+      "query": "Búsqueda concreta para encontrar empresas",
+      "justificacion": "Empresas insatisfechas con alternativas caras"
+    }
   ]
 }
 `;
@@ -104,7 +143,7 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta:
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        temperature: 0.2
+        temperature: 0.25
       }
     });
 
@@ -112,7 +151,7 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta:
 
     return NextResponse.json({
       success: true,
-      url: formattedUrl,
+      url: targetUrl || null,
       analisis: parsed
     });
 

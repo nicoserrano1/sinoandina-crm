@@ -26,28 +26,31 @@ ${contextoOferta ? `Contexto de la empresa oferente / propuesta de valor: "${con
 
 Perfil del tomador de decisión requerido: ${decisorTipo || "Jefatura de Compras / Abastecimiento o Gerencia General"}.
 
-Para cada empresa entrega información comercial verificable en Chile / Latam:
+Para cada empresa entrega información comercial verificable:
 - nombre: Nombre comercial oficial.
 - url: Sitio web oficial (https://...).
-- tomador_decision: Nombre de la persona o jefatura específica del área.
-- cargo: Cargo exacto del decisor.
-- email: Correo departamental o corporativo de contacto (ej: adquisiciones@dominio.cl, compras@dominio.cl, contacto@...).
-- telefono: Teléfono de contacto en formato chileno (+56 9 XXXX XXXX o +56 2 XXXX XXXX).
-- partida: Partida o área de compra estimada (ej: "Terminaciones y Revestimientos", "Cubicaciones", "Climatización", "Materiales de Obra Gruesa", "Suministros Industriales").
-- por_que_es_match: Una frase corta de por qué es una excelente oportunidad comercial.
+- tomador_decision: Nombre de la persona o jefatura específica del área según el cargo solicitado.
+- cargo: Cargo exacto del tomador de decisión.
+- email: Correo departamental o corporativo de contacto (ej: contacto@..., adquisiciones@..., gerencia@...).
+- telefono: Teléfono de contacto comercial (+56 9 XXXX XXXX o formato local correspondiente).
+- area_interes: Área, servicio o producto específico de su negocio que calza con esta búsqueda (ej: "Transformación Digital", "Servicios Legales Corporativos", "Insumos Médicos", "Suministros Industriales", "Capacitación", "Infraestructura").
+- por_que_es_match: Una frase concisa explicando por qué esta empresa es un cliente ideal para esta oferta.
 
 Devuelve ÚNICAMENTE un JSON válido con la estructura:
 {
   "empresas": [
     {
-      "nombre": "Empresa SpA",
-      "url": "https://empresa.cl",
-      "tomador_decision": "Juan Pérez",
-      "cargo": "Gerente de Adquisiciones",
-      "email": "adquisiciones@empresa.cl",
-      "telefono": "+56 9 8765 4321",
-      "partida": "Terminaciones",
-      "por_que_es_match": "Constructora activa con proyectos habitacionales en la Región Metropolitana."
+      "nombre": "Nombre de Empresa",
+      "url": "https://empresa.com",
+      "tomador_decision": "Nombre Decisor",
+      "cargo": "Cargo del Decisor",
+      "email": "contacto@empresa.com",
+      "telefono": "+56 9 1234 5678",
+      "area_interes": "Área de Interés",
+      "por_que_es_match": "Razón por la cual calza con el perfil buscado."
+    }
+  ]
+}
     }
   ]
 }

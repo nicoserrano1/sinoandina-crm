@@ -28,14 +28,14 @@ export async function POST(req: Request) {
       const recordsToInsert = empresasEncontradas.map((emp: any) => ({
         empresa: emp.nombre,
         url: emp.url || "",
-        email: emp.email || "adquisiciones@" + (emp.url ? emp.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] : 'empresa.cl'),
-        decisor: emp.tomador_decision || "Jefatura de Abastecimiento",
-        cargo: emp.cargo || "Gerente de Adquisiciones",
+        email: emp.email || (emp.url ? "contacto@" + emp.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] : 'contacto@empresa.com'),
+        decisor: emp.tomador_decision || "Directivo / Responsable",
+        cargo: emp.cargo || decisorTipo || "Tomador de Decisión",
         telefono: emp.telefono || "",
         monto_clp: 0,
-        partida: emp.partida || "",
+        partida: emp.area_interes || emp.partida || "",
         estado: "Nuevo",
-        notas: emp.por_que_es_match || `Prospectado automáticamente para: ${criterio}`
+        notas: emp.por_que_es_match || `Prospectado para: ${criterio}`
       }));
 
       const { data, error } = await supabase
@@ -54,12 +54,12 @@ export async function POST(req: Request) {
         id: `auto-${Date.now()}-${index}`,
         empresa: emp.nombre,
         url: emp.url || "",
-        email: emp.email || "adquisiciones@" + (emp.url ? emp.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] : 'empresa.cl'),
-        decisor: emp.tomador_decision || "Jefatura de Abastecimiento",
-        cargo: emp.cargo || "Gerente de Adquisiciones",
+        email: emp.email || (emp.url ? "contacto@" + emp.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] : 'contacto@empresa.com'),
+        decisor: emp.tomador_decision || "Directivo / Responsable",
+        cargo: emp.cargo || decisorTipo || "Tomador de Decisión",
         telefono: emp.telefono || "",
         monto_clp: 0,
-        partida: emp.partida || "",
+        partida: emp.area_interes || emp.partida || "",
         estado: "Nuevo" as const,
         notas: emp.por_que_es_match || `Prospectado para: ${criterio}`,
         created_at: new Date().toISOString()
