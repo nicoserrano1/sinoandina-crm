@@ -5,8 +5,6 @@ import Sidebar from '@/components/Sidebar';
 import HeaderStats from '@/components/HeaderStats';
 import KanbanBoard from '@/components/KanbanBoard';
 import ProspectorPanel from '@/components/ProspectorPanel';
-import SeguimientosPanel from '@/components/SeguimientosPanel';
-import TableView from '@/components/TableView';
 import ModalNuevoLead from '@/components/ModalNuevoLead';
 import ModalLeadFicha from '@/components/ModalLeadFicha';
 import ModalEnviarCorreo from '@/components/ModalEnviarCorreo';
@@ -189,9 +187,7 @@ export default function Home() {
 
   const titulosVistas: Record<string, string> = {
     kanban: 'Pipeline Comercial',
-    prospector: 'Prospección de Empresas',
-    seguimientos: 'Seguimientos Pendientes',
-    tabla: 'Base de Datos de Clientes'
+    prospector: 'Explorador B2B & Scraping con IA'
   };
 
   return (
@@ -235,20 +231,6 @@ export default function Home() {
           {activeTab === 'prospector' && (
             <ProspectorPanel
               onLeadsAgregados={handleLeadsAgregadosPorProspector}
-            />
-          )}
-
-          {activeTab === 'seguimientos' && (
-            <SeguimientosPanel
-              leads={leads}
-              onSendEmail={(lead) => setSelectedLeadForEmail(lead)}
-            />
-          )}
-
-          {activeTab === 'tabla' && (
-            <TableView
-              leads={leads}
-              onEditLead={(lead) => setSelectedLeadForEdit(lead)}
             />
           )}
         </main>

@@ -53,9 +53,44 @@ export default function ModalEnviarCorreo({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleAbrirEnCliente = () => {
+  const handleAbrirEnCliente = async () => {
     const mailto = `mailto:${lead.email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
     window.open(mailto, '_blank');
+
+    // Registrar en el historial de actividades de la tarjeta
+    try {
+      await fetch('/api/actividades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lead_id: lead.id,
+          tipo: 'correo',
+          descripcion: `Asunto: ${asunto}\n\n${cuerpo}`
+        })
+      });
+    } catch (e) {
+      console.error('Error registrando actividad de correo:', e);
+    }
+
+    onEmailEnviado(lead.id);
+    onClose();
+  };
+
+  const handleRegistrarComoEnviado = async () => {
+    try {
+      await fetch('/api/actividades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lead_id: lead.id,
+          tipo: 'correo',
+          descripcion: `Asunto: ${asunto}\n\n${cuerpo}`
+        })
+      });
+    } catch (e) {
+      console.error('Error registrando actividad:', e);
+    }
+
     onEmailEnviado(lead.id);
     onClose();
   };
@@ -138,21 +173,30 @@ export default function ModalEnviarCorreo({
               />
             </div>
 
-            <div className="pt-2 flex items-center justify-between gap-2">
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-2">
               <button
                 onClick={handleCopiar}
-                className="flex items-center gap-1.5 py-2 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white text-xs font-medium transition"
+                className="w-full sm:w-auto flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white text-xs font-medium transition"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? 'Copiado' : 'Copiar'}</span>
               </button>
 
               <button
+                onClick={handleRegistrarComoEnviado}
+                className="w-full sm:w-auto flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white text-xs font-medium border border-white/[0.08] transition"
+                title="Registrar en el historial de la tarjeta sin abrir cliente de correo"
+              >
+                <Check className="w-3.5 h-3.5 text-amber-400" />
+                <span>Registrar en Historial</span>
+              </button>
+
+              <button
                 onClick={handleAbrirEnCliente}
-                className="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm transition"
+                className="w-full sm:flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-sm transition"
               >
                 <Mail className="w-3.5 h-3.5" />
-                <span>Abrir en Gmail / Correo</span>
+                <span>Abrir en Gmail & Registrar</span>
               </button>
             </div>
           </div>

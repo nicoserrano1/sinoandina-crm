@@ -5,10 +5,13 @@ import {
   Search, 
   RefreshCw, 
   Download, 
-  Settings2
+  Settings2,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { Lead, LeadStatus, PipelineEtapa } from '@/lib/types';
 import LeadCard from './LeadCard';
+import TableView from './TableView';
 
 interface KanbanBoardProps {
   leads: Lead[];
@@ -29,6 +32,7 @@ export default function KanbanBoard({
   onRefresh,
   onOpenPersonalizarEtapas
 }: KanbanBoardProps) {
+  const [vista, setVista] = useState<'kanban' | 'tabla'>('kanban');
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroRapido, setFiltroRapido] = useState<'todos' | 'con_monto' | 'estancados'>('todos');
   const [orden, setOrden] = useState<'recientes' | 'mayor_monto' | 'dias'>('recientes');
@@ -102,15 +106,43 @@ export default function KanbanBoard({
       {/* Toolbar Limpia con Botón de Personalización */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4 flex-shrink-0">
         {/* Buscador minimalista */}
-        <div className="relative flex-1 min-w-[240px] max-w-sm">
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar empresa, contacto o partida..."
-            className="w-full bg-[#11141D] border border-white/[0.08] focus:border-blue-500/50 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-slate-500 outline-none transition"
+            className="w-full bg-[#11141D] border border-white/[0.08] focus:border-amber-500/50 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-slate-500 outline-none transition"
           />
+        </div>
+
+        {/* Selector de Vista: Tablero Kanban o Tabla */}
+        <div className="flex items-center gap-1 bg-[#11141D] p-1 rounded-xl border border-white/[0.08] text-xs">
+          <button
+            onClick={() => setVista('kanban')}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition ${
+              vista === 'kanban' 
+                ? 'bg-amber-500/20 text-amber-200 font-semibold' 
+                : 'text-slate-400 hover:text-white'
+            }`}
+            title="Vista Tablero Kanban"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span>Tablero</span>
+          </button>
+          <button
+            onClick={() => setVista('tabla')}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition ${
+              vista === 'tabla' 
+                ? 'bg-amber-500/20 text-amber-200 font-semibold' 
+                : 'text-slate-400 hover:text-white'
+            }`}
+            title="Vista Tabla"
+          >
+            <List className="w-3.5 h-3.5" />
+            <span>Tabla</span>
+          </button>
         </div>
 
         {/* Filtros Rápidos */}
@@ -181,76 +213,82 @@ export default function KanbanBoard({
         </div>
       </div>
 
-      {/* Grid Dinámico de Columnas Personalizadas con Drag & Drop */}
-      <div className="flex-1 flex gap-3.5 overflow-x-auto overflow-y-hidden min-h-0 pb-1">
-        {etapas.map((col) => {
-          const leadsColumna = leadsFiltrados.filter((l) => l.estado === col.id);
-          const totalColumna = leadsColumna.reduce((sum, l) => sum + (l.monto_clp || 0), 0);
-          const isOver = dragOverCol === col.id;
+      {/* Contenido: Tablero Kanban o Tabla */}
+      {vista === 'tabla' ? (
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <TableView leads={leadsFiltrados} onEditLead={onEditLead} />
+        </div>
+      ) : (
+        <div className="flex-1 flex gap-3.5 overflow-x-auto overflow-y-hidden min-h-0 pb-1">
+          {etapas.map((col) => {
+            const leadsColumna = leadsFiltrados.filter((l) => l.estado === col.id);
+            const totalColumna = leadsColumna.reduce((sum, l) => sum + (l.monto_clp || 0), 0);
+            const isOver = dragOverCol === col.id;
 
-          return (
-            <div
-              key={col.id}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setDragOverCol(col.id);
-              }}
-              onDragLeave={() => setDragOverCol(null)}
-              onDrop={(e) => {
-                e.preventDefault();
-                const leadId = e.dataTransfer.getData('leadId');
-                if (leadId) {
-                  onMoverEstado(leadId, col.id);
-                }
-                setDragOverCol(null);
-              }}
-              className={`w-[290px] min-w-[290px] max-w-[290px] flex-shrink-0 bg-[#0C0F17] border rounded-2xl flex flex-col h-full overflow-hidden transition-all duration-150 ${
-                isOver 
-                  ? 'border-blue-500/60 bg-blue-500/[0.03]' 
-                  : 'border-white/[0.06]'
-              }`}
-            >
-              {/* Header de Columna Dinámica */}
-              <div className="p-3.5 border-b border-white/[0.06] flex items-center justify-between flex-shrink-0 bg-[#0C0F17]">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${col.dotColor || 'bg-blue-500'}`} />
-                  <span className="text-xs font-bold tracking-tight text-slate-200 truncate">
-                    {col.nombre}
+            return (
+              <div
+                key={col.id}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragOverCol(col.id);
+                }}
+                onDragLeave={() => setDragOverCol(null)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const leadId = e.dataTransfer.getData('leadId');
+                  if (leadId) {
+                    onMoverEstado(leadId, col.id);
+                  }
+                  setDragOverCol(null);
+                }}
+                className={`w-[290px] min-w-[290px] max-w-[290px] flex-shrink-0 bg-[#0C0F17] border rounded-2xl flex flex-col h-full overflow-hidden transition-all duration-150 ${
+                  isOver 
+                    ? 'border-blue-500/60 bg-blue-500/[0.03]' 
+                    : 'border-white/[0.06]'
+                }`}
+              >
+                {/* Header de Columna Dinámica */}
+                <div className="p-3.5 border-b border-white/[0.06] flex items-center justify-between flex-shrink-0 bg-[#0C0F17]">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${col.dotColor || 'bg-blue-500'}`} />
+                    <span className="text-xs font-bold tracking-tight text-slate-200 truncate">
+                      {col.nombre}
+                    </span>
+                  </div>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/[0.04] text-slate-400">
+                    {leadsColumna.length}
                   </span>
                 </div>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/[0.04] text-slate-400">
-                  {leadsColumna.length}
-                </span>
-              </div>
 
-              {/* Subtotal en CLP */}
-              {totalColumna > 0 && (
-                <div className="px-3.5 py-1 bg-white/[0.02] border-b border-white/[0.04] text-[11px] font-semibold text-emerald-400 text-right">
-                  ${totalColumna.toLocaleString('es-CL')} CLP
-                </div>
-              )}
-
-              {/* Lista de Tarjetas (Drop Zone) */}
-              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2.5 space-y-2.5">
-                {leadsColumna.length === 0 ? (
-                  <div className="h-28 border border-dashed border-white/[0.06] rounded-xl flex items-center justify-center text-xs text-slate-600 font-medium">
-                    Arrastra una tarjeta aquí
+                {/* Subtotal en CLP */}
+                {totalColumna > 0 && (
+                  <div className="px-3.5 py-1 bg-white/[0.02] border-b border-white/[0.04] text-[11px] font-semibold text-emerald-400 text-right">
+                    ${totalColumna.toLocaleString('es-CL')} CLP
                   </div>
-                ) : (
-                  leadsColumna.map((lead) => (
-                    <LeadCard
-                      key={lead.id}
-                      lead={lead}
-                      onEdit={onEditLead}
-                      onSendEmail={onSendEmail}
-                    />
-                  ))
                 )}
+
+                {/* Lista de Tarjetas (Drop Zone) */}
+                <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2.5 space-y-2.5">
+                  {leadsColumna.length === 0 ? (
+                    <div className="h-28 border border-dashed border-white/[0.06] rounded-xl flex items-center justify-center text-xs text-slate-600 font-medium">
+                      Arrastra una tarjeta aquí
+                    </div>
+                  ) : (
+                    leadsColumna.map((lead) => (
+                      <LeadCard
+                        key={lead.id}
+                        lead={lead}
+                        onEdit={onEditLead}
+                        onSendEmail={onSendEmail}
+                      />
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

@@ -24,6 +24,14 @@ interface SidebarProps {
   setIsCollapsed: (collapsed: boolean | ((prev: boolean) => boolean)) => void;
 }
 
+interface MenuItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  badge?: number;
+  badgeColor?: string;
+}
+
 export default function Sidebar({
   activeTab,
   setActiveTab,
@@ -34,7 +42,7 @@ export default function Sidebar({
   isCollapsed,
   setIsCollapsed
 }: SidebarProps) {
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     { 
       id: 'kanban', 
       label: 'Pipeline Comercial', 
@@ -43,20 +51,8 @@ export default function Sidebar({
     },
     { 
       id: 'prospector', 
-      label: 'Prospector', 
+      label: 'Explorador B2B', 
       icon: Search 
-    },
-    { 
-      id: 'seguimientos', 
-      label: 'Seguimientos', 
-      icon: Clock, 
-      badge: seguimientosCount, 
-      badgeColor: 'bg-amber-500/15 text-amber-300' 
-    },
-    { 
-      id: 'tabla', 
-      label: 'Base de Datos', 
-      icon: Database 
     },
   ];
 

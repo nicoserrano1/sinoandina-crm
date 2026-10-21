@@ -47,6 +47,14 @@ export interface PipelineMetrics {
   creditosDisponibles: number;
 }
 
+export interface Actividad {
+  id: string;
+  lead_id: string;
+  tipo: 'correo' | 'whatsapp' | 'nota' | 'cambio_etapa';
+  descripcion: string;
+  created_at: string;
+}
+
 export interface ProspectarRequest {
   criterio: string;
   limite: number;
