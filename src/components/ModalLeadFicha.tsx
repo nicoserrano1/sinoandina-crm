@@ -243,9 +243,21 @@ export default function ModalLeadFicha({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Columna Izquierda: Datos Comerciales del Prospecto */}
           <div className="space-y-4">
-            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
-              Información de Contacto & Trato
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                Información de Contacto & Trato
+              </span>
+
+              <a
+                href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(lead.empresa.replace(/SpA|S\.A\.|Limitada|Ltda\.?|Chile/gi, '').trim() + ' gerente OR director OR fundador OR compras')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] font-semibold text-sky-400 hover:text-sky-300 flex items-center gap-1 hover:underline"
+                title="Abrir búsqueda de empleados en LinkedIn"
+              >
+                <span>Buscar directivos en LinkedIn ➜</span>
+              </a>
+            </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>

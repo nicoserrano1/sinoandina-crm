@@ -46,6 +46,16 @@ export default function LeadCard({
 
   const waLink = getWhatsAppLink();
 
+  // Búsqueda directa y precisa de directivos en LinkedIn
+  const getLinkedInSearchUrl = () => {
+    if (lead.linkedin_url) return lead.linkedin_url;
+    const cleanCompany = lead.empresa.replace(/SpA|S\.A\.|Limitada|Ltda\.?|Chile/gi, '').trim();
+    const cleanCargo = lead.cargo && lead.cargo !== 'Equipo Directivo' ? lead.cargo : 'gerente OR director OR fundador';
+    return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(cleanCompany + ' ' + cleanCargo)}`;
+  };
+
+  const linkedinUrl = getLinkedInSearchUrl();
+
   return (
     <div 
       draggable
@@ -78,9 +88,28 @@ export default function LeadCard({
         )}
       </div>
 
-      {/* Tomador de Decisión & Cargo */}
-      <div className="text-xs font-medium text-slate-300 truncate">{lead.decisor}</div>
-      <div className="text-[11px] text-slate-500 mb-3 truncate">{lead.cargo}</div>
+      {/* Tomador de Decisión & Acceso Directo a LinkedIn */}
+      <div className="flex items-center justify-between gap-2 mb-2.5">
+        <div className="min-w-0 flex-1">
+          <div className="text-xs font-semibold text-slate-200 truncate">
+            {lead.decisor}
+          </div>
+          <div className="text-[11px] text-slate-400 truncate">
+            {lead.cargo}
+          </div>
+        </div>
+
+        <a
+          href={linkedinUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="px-2 py-1 rounded-lg bg-[#0077B5]/10 hover:bg-[#0077B5]/25 border border-[#0077B5]/30 text-[#0077B5] hover:text-sky-300 text-[10px] font-bold transition flex items-center gap-1 flex-shrink-0"
+          title="Ver perfiles reales de esta empresa en LinkedIn"
+        >
+          <span>in</span>
+        </a>
+      </div>
 
       {/* Tags: Monto en CLP & Partida */}
       <div className="flex flex-wrap gap-1.5 mb-3">

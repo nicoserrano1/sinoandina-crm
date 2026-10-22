@@ -19,6 +19,7 @@ export interface Lead {
   partida: string;
   estado: LeadStatus;
   notas: string;
+  linkedin_url?: string;
   created_at: string;
   updated_at?: string;
   dias_inactivo?: number;

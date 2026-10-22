@@ -67,15 +67,21 @@ Tu objetivo es encontrar ${limite} empresas u organizaciones comerciales reales,
 
 ${contextoOferta ? `Contexto de la empresa oferente / propuesta de valor o competidor de referencia: "${contextoOferta}". Prioriza empresas que tengan necesidad directa de este tipo de oferta.` : ""}
 
-Perfil del tomador de decisión requerido: ${decisorTipo || "Directivo / Gerencia General / Responsable del Área"}.
+Perfil del tomador de decisión sugerido: ${decisorTipo || "Directivo / Gerencia General / Responsable del Área"}.
+
+REGLAS ESTRICTAS DE CALIDAD B2B (CERO NOMBRES INVENTADOS):
+1. PROHIBIDO inventar nombres con iniciales ficticias (tipo "Alejandro T." o "Héctor C."). 
+   - Si conoces al fundador, dueño o directivo real público de la empresa en LinkedIn/web, escribe su NOMBRE COMPLETO.
+   - Si no tienes certeza del nombre específico de la persona, indica con total honestidad "Equipo Directivo", "Gerencia General" o "Jefatura de Área". NUNCA inventes nombres falsos.
+2. NO pongas el mismo cargo a todas las empresas. Varía según la estructura de cada organización (ej. "Socio Fundador", "Gerente de Operaciones", "Director de Proyectos", "Jefe de Compras", "Gerente General").
 
 Para cada empresa entrega información comercial verificable:
 - nombre: Nombre comercial oficial.
 - url: Sitio web oficial (https://...).
-- tomador_decision: Nombre de la persona o jefatura específica del área según el cargo solicitado.
-- cargo: Cargo exacto del tomador de decisión.
-- email: Correo departamental o corporativo de contacto (ej: contacto@..., adquisiciones@..., gerencia@...).
-- telefono: Teléfono de contacto comercial (+56 9 XXXX XXXX o formato local correspondiente).
+- tomador_decision: Nombre completo del directivo real público, o "Equipo Directivo" si no está disponible.
+- cargo: Cargo específico y variado según la empresa.
+- email: Correo corporativo o departamental de contacto (ej: contacto@..., gerencia@..., proyectos@...).
+- telefono: Teléfono de contacto comercial (+56 9 XXXX XXXX o +56 2 XXXX XXXX).
 - area_interes: Área, servicio o producto específico de su negocio que calza con esta búsqueda.
 - por_que_es_match: Una frase concisa explicando por qué esta empresa es un cliente ideal para esta oferta.
 
