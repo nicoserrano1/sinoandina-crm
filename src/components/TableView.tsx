@@ -77,28 +77,26 @@ export default function TableView({ leads, onEditLead }: TableViewProps) {
                       const emails = resolveLeadEmails(lead);
                       const phone = classifyPhone(lead.telefono);
                       return (
-                        <div className="space-y-1">
+                        <div className="space-y-1 text-[11px]">
                           {emails.length > 0 && (
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 font-mono">
                               <span className="text-white">{emails[0].email}</span>
-                              <span className={`text-[8px] font-bold px-1 rounded border ${emails[0].badgeColor}`}>
-                                {emails[0].badgeLabel.split(' ')[0]}
+                              <span className="text-[10px] text-slate-500 font-sans">
+                                {emails[0].origen === 'real_web_generico' ? '(web)' : '(directo)'}
                               </span>
                             </div>
                           )}
                           {emails.length > 1 && (
-                            <div className="flex items-center gap-1.5 text-slate-400 text-[10px]">
+                            <div className="flex items-center gap-1.5 text-amber-200/90 font-mono text-[10px]">
                               <span>{emails[1].email}</span>
-                              <span className={`text-[8px] font-bold px-1 rounded border ${emails[1].badgeColor}`}>
-                                {emails[1].badgeLabel.split(' ')[0]}
-                              </span>
+                              <span className="text-[9px] text-amber-400/80 font-sans">(directo)</span>
                             </div>
                           )}
                           {phone.numero && (
-                            <div className="flex items-center gap-1.5 text-slate-400 text-[10px] pt-0.5">
+                            <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[10px]">
                               <span>{phone.numero}</span>
-                              <span className={`text-[8px] font-bold px-1 rounded border ${phone.badgeColor}`}>
-                                {phone.badgeLabel.split(' ')[0]}
+                              <span className={`text-[9px] font-sans ${phone.tipo === 'movil_directo' ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                {phone.tipo === 'movil_directo' ? '(móvil)' : '(central)'}
                               </span>
                             </div>
                           )}

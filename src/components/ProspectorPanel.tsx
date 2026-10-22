@@ -741,7 +741,7 @@ export default function ProspectorPanel({
                         )}
                       </div>
 
-                      <div className="pt-2 border-t border-white/[0.04] space-y-1 text-[10px]">
+                      <div className="pt-2 border-t border-white/[0.04] space-y-1 text-[11px]">
                         {(() => {
                           const emails = resolveLeadEmails(lead);
                           const phone = classifyPhone(lead.telefono);
@@ -749,26 +749,26 @@ export default function ProspectorPanel({
                           return (
                             <>
                               {emails.length > 0 && (
-                                <div className="flex items-center justify-between gap-1 text-slate-300">
-                                  <span className="truncate">{emails[0].email}</span>
-                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded border flex-shrink-0 ${emails[0].badgeColor}`}>
-                                    {emails[0].badgeLabel}
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className="font-mono text-xs text-slate-200 truncate flex-1 min-w-0">{emails[0].email}</span>
+                                  <span className="text-[10px] text-slate-500 flex-shrink-0">
+                                    {emails[0].origen === 'real_web_generico' ? '(web)' : '(directo)'}
                                   </span>
                                 </div>
                               )}
                               {emails.length > 1 && (
-                                <div className="flex items-center justify-between gap-1 text-slate-400 pl-2">
-                                  <span className="truncate">{emails[1].email}</span>
-                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded border flex-shrink-0 ${emails[1].badgeColor}`}>
-                                    {emails[1].badgeLabel}
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className="font-mono text-xs text-amber-200/90 truncate flex-1 min-w-0">{emails[1].email}</span>
+                                  <span className="text-[10px] text-amber-400/80 flex-shrink-0">
+                                    (directo)
                                   </span>
                                 </div>
                               )}
                               {phone.numero && (
-                                <div className="flex items-center justify-between gap-1 text-slate-400 pt-0.5">
-                                  <span className="truncate">{phone.numero}</span>
-                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded border flex-shrink-0 ${phone.badgeColor}`}>
-                                    {phone.badgeLabel}
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className="font-mono text-xs text-slate-300 flex-1 min-w-0">{phone.numero}</span>
+                                  <span className={`text-[10px] flex-shrink-0 ${phone.tipo === 'movil_directo' ? 'text-emerald-400 font-medium' : 'text-slate-500'}`}>
+                                    {phone.tipo === 'movil_directo' ? '(móvil)' : '(central)'}
                                   </span>
                                 </div>
                               )}

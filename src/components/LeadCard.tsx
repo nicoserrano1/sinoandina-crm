@@ -9,8 +9,7 @@ import {
   MessageSquare, 
   Clock,
   Package,
-  GripVertical,
-  Sparkles
+  GripVertical
 } from 'lucide-react';
 import { Lead } from '@/lib/types';
 import { getLinkedInUrl, isGenericDecisor } from '@/lib/linkedin';
@@ -130,53 +129,43 @@ export default function LeadCard({
         )}
       </div>
 
-      {/* Directorio de Contacto Transparente (Optimizado para visibilidad total sin cortes) */}
-      <div className="bg-[#090C12] border border-white/[0.06] rounded-xl p-2.5 space-y-2 mb-3">
-        {/* Email Principal / Web */}
+      {/* Lista vertical limpia de contacto: 1 sola columna hacia abajo */}
+      <div className="space-y-1 mb-3 text-[11px]">
+        {/* Email Web o Principal */}
         {emailList.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between text-[10px] mb-0.5">
-              <span className="text-slate-400 font-medium flex items-center gap-1">
-                <Mail className="w-3 h-3 text-slate-500" />
-                <span>{emailList[0].origen === 'real_web_generico' ? 'Mesa Central (Web)' : 'Correo Principal'}</span>
-              </span>
-              <span className={`text-[9px] font-semibold px-1.5 py-0.2 rounded border ${emailList[0].badgeColor}`}>
-                {emailList[0].origen === 'real_web_generico' ? '🏢 Web Empresa' : '👤 Verificado'}
-              </span>
-            </div>
-            <div className="text-slate-200 text-[11px] font-mono break-all select-all leading-tight pl-4">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Mail className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+            <span className="font-mono text-xs text-slate-200 break-all select-all flex-1 min-w-0">
               {emailList[0].email}
-            </div>
+            </span>
+            <span className="text-[10px] text-slate-500 flex-shrink-0">
+              {emailList[0].origen === 'real_web_generico' ? '(web)' : '(directo)'}
+            </span>
           </div>
         )}
 
-        {/* Segundo Correo / Estimado Directo */}
+        {/* Email Directo Estimado (si existe) */}
         {emailList.length > 1 && (
-          <div className="pt-1.5 border-t border-white/[0.04]">
-            <div className="flex items-center justify-between text-[10px] mb-0.5">
-              <span className="text-amber-300 font-medium flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                <span>Directo Estimado ({emailList[1].esMasProbable ? '50% Más Probable' : 'Alternativo'}):</span>
-              </span>
-              <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded border text-amber-300 bg-amber-500/15 border-amber-500/30">
-                💡 Patrón IA
-              </span>
-            </div>
-            <div className="text-amber-200 text-[11px] font-mono break-all select-all leading-tight pl-4">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Mail className="w-3.5 h-3.5 text-amber-500/70 flex-shrink-0" />
+            <span className="font-mono text-xs text-amber-200/90 break-all select-all flex-1 min-w-0">
               {emailList[1].email}
-            </div>
+            </span>
+            <span className="text-[10px] text-amber-400/80 flex-shrink-0">
+              (directo)
+            </span>
           </div>
         )}
 
-        {/* Teléfono con Clasificación Transparente */}
+        {/* Teléfono */}
         {phoneInfo.numero && (
-          <div className="pt-1.5 border-t border-white/[0.04] flex items-center justify-between gap-1">
-            <div className="flex items-center gap-1.5 text-xs text-slate-300 font-mono">
-              <Phone className="w-3 h-3 text-slate-500 flex-shrink-0" />
-              <span>{phoneInfo.numero}</span>
-            </div>
-            <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border flex-shrink-0 ${phoneInfo.badgeColor}`}>
-              {phoneInfo.tipo === 'movil_directo' ? '📱 Celular / WA' : '☎️ Mesa Central'}
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Phone className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+            <span className="font-mono text-xs text-slate-300 flex-1 min-w-0">
+              {phoneInfo.numero}
+            </span>
+            <span className={`text-[10px] flex-shrink-0 ${phoneInfo.tipo === 'movil_directo' ? 'text-emerald-400 font-medium' : 'text-slate-500'}`}>
+              {phoneInfo.tipo === 'movil_directo' ? '(móvil)' : '(central)'}
             </span>
           </div>
         )}

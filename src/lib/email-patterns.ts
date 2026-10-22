@@ -119,16 +119,30 @@ export function generateExecutiveEmails(
 ): EmailSugerido[] {
   if (!decisor || !domainOrUrlOrEmail) return [];
 
-  // Evitar generar correos si el decisor es genérico
+  // Evitar generar correos si el decisor es genérico o un departamento
   const dLower = decisor.toLowerCase();
-  if (
-    dLower.includes('equipo directivo') ||
-    dLower.includes('gerencia general') ||
-    dLower.includes('dirección') ||
-    dLower.includes('directorio') ||
-    dLower.includes('jefatura') ||
-    dLower.includes('responsable')
-  ) {
+  const genericWords = [
+    'equipo directivo',
+    'gerencia',
+    'gerente',
+    'dirección',
+    'director',
+    'directorio',
+    'jefatura',
+    'jefe',
+    'responsable',
+    'abastecimiento',
+    'adquisiciones',
+    'compras',
+    'operaciones',
+    'proyectos',
+    'administración',
+    'departamento',
+    'contacto',
+    'comercial',
+    'ventas'
+  ];
+  if (genericWords.some(w => dLower.includes(w))) {
     return [];
   }
 
