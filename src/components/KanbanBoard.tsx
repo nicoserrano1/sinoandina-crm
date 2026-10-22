@@ -241,7 +241,7 @@ export default function KanbanBoard({
                   }
                   setDragOverCol(null);
                 }}
-                className={`w-[290px] min-w-[290px] max-w-[290px] flex-shrink-0 bg-[#0C0F17] border rounded-2xl flex flex-col h-full overflow-hidden transition-all duration-150 ${
+                className={`w-[320px] min-w-[320px] max-w-[320px] flex-shrink-0 bg-[#0C0F17] border rounded-2xl flex flex-col h-full overflow-hidden transition-all duration-150 ${
                   isOver 
                     ? 'border-blue-500/60 bg-blue-500/[0.03]' 
                     : 'border-white/[0.06]'

@@ -9,7 +9,8 @@ import {
   MessageSquare, 
   Clock,
   Package,
-  GripVertical
+  GripVertical,
+  Sparkles
 } from 'lucide-react';
 import { Lead } from '@/lib/types';
 import { getLinkedInUrl, isGenericDecisor } from '@/lib/linkedin';
@@ -122,56 +123,60 @@ export default function LeadCard({
           </span>
         )}
         {lead.partida && (
-          <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-400 border border-white/[0.06] truncate max-w-full">
-            <Package className="w-3 h-3 flex-shrink-0" />
-            <span className="truncate">{lead.partida}</span>
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-300 border border-white/[0.06] leading-snug">
+            <Package className="w-3 h-3 text-amber-400 flex-shrink-0" />
+            <span>{lead.partida}</span>
           </span>
         )}
       </div>
 
-      {/* Datos de Contacto con Certeza y Múltiples Correos */}
-      <div className="space-y-1.5 mb-3 text-[11px]">
+      {/* Directorio de Contacto Transparente (Optimizado para visibilidad total sin cortes) */}
+      <div className="bg-[#090C12] border border-white/[0.06] rounded-xl p-2.5 space-y-2 mb-3">
         {/* Email Principal / Web */}
         {emailList.length > 0 && (
-          <div className="flex items-center justify-between gap-1.5">
-            <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
-              <Mail className="w-3 h-3 text-slate-500 flex-shrink-0" />
-              <span className="truncate text-slate-300 font-medium">{emailList[0].email}</span>
+          <div>
+            <div className="flex items-center justify-between text-[10px] mb-0.5">
+              <span className="text-slate-400 font-medium flex items-center gap-1">
+                <Mail className="w-3 h-3 text-slate-500" />
+                <span>{emailList[0].origen === 'real_web_generico' ? 'Mesa Central (Web)' : 'Correo Principal'}</span>
+              </span>
+              <span className={`text-[9px] font-semibold px-1.5 py-0.2 rounded border ${emailList[0].badgeColor}`}>
+                {emailList[0].origen === 'real_web_generico' ? '🏢 Web Empresa' : '👤 Verificado'}
+              </span>
             </div>
-            <span 
-              className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border flex-shrink-0 ${emailList[0].badgeColor}`}
-              title={emailList[0].descripcion}
-            >
-              {emailList[0].badgeLabel}
-            </span>
+            <div className="text-slate-200 text-[11px] font-mono break-all select-all leading-tight pl-4">
+              {emailList[0].email}
+            </div>
           </div>
         )}
 
-        {/* Segundo correo posible / Estimación directa */}
+        {/* Segundo Correo / Estimado Directo */}
         {emailList.length > 1 && (
-          <div className="flex items-center justify-between gap-1.5 pl-4 text-[10px]">
-            <span className="truncate text-slate-400">{emailList[1].email}</span>
-            <span 
-              className={`text-[9px] font-semibold px-1.5 py-0.2 rounded border flex-shrink-0 ${emailList[1].badgeColor}`}
-              title={emailList[1].descripcion}
-            >
-              {emailList[1].badgeLabel}
-            </span>
+          <div className="pt-1.5 border-t border-white/[0.04]">
+            <div className="flex items-center justify-between text-[10px] mb-0.5">
+              <span className="text-amber-300 font-medium flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                <span>Directo Estimado ({emailList[1].esMasProbable ? '50% Más Probable' : 'Alternativo'}):</span>
+              </span>
+              <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded border text-amber-300 bg-amber-500/15 border-amber-500/30">
+                💡 Patrón IA
+              </span>
+            </div>
+            <div className="text-amber-200 text-[11px] font-mono break-all select-all leading-tight pl-4">
+              {emailList[1].email}
+            </div>
           </div>
         )}
 
         {/* Teléfono con Clasificación Transparente */}
         {phoneInfo.numero && (
-          <div className="flex items-center justify-between gap-1.5">
-            <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
+          <div className="pt-1.5 border-t border-white/[0.04] flex items-center justify-between gap-1">
+            <div className="flex items-center gap-1.5 text-xs text-slate-300 font-mono">
               <Phone className="w-3 h-3 text-slate-500 flex-shrink-0" />
-              <span className="truncate text-slate-400">{phoneInfo.numero}</span>
+              <span>{phoneInfo.numero}</span>
             </div>
-            <span 
-              className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border flex-shrink-0 ${phoneInfo.badgeColor}`}
-              title={phoneInfo.descripcion}
-            >
-              {phoneInfo.badgeLabel}
+            <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border flex-shrink-0 ${phoneInfo.badgeColor}`}>
+              {phoneInfo.tipo === 'movil_directo' ? '📱 Celular / WA' : '☎️ Mesa Central'}
             </span>
           </div>
         )}
