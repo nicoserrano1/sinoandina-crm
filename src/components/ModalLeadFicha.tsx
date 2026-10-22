@@ -11,10 +11,12 @@ import {
   Clock, 
   Send, 
   Phone,
-  FileText
+  FileText,
+  Sparkles
 } from 'lucide-react';
 import { Lead, LeadStatus, PipelineEtapa, Actividad } from '@/lib/types';
 import { getLinkedInUrl, isGenericDecisor, extractLinkedInFromNotes } from '@/lib/linkedin';
+import { generateExecutiveEmails, isGenericEmail } from '@/lib/email-patterns';
 
 interface ModalLeadFichaProps {
   lead: Lead | null;
@@ -103,6 +105,8 @@ export default function ModalLeadFicha({
     notas
   });
   const isGeneric = isGenericDecisor(decisor);
+  const suggestedEmails = generateExecutiveEmails(decisor, lead.url || email);
+  const isGen = isGenericEmail(email);
 
   const handleGuardar = async () => {
     setLoading(true);
@@ -341,6 +345,51 @@ export default function ModalLeadFicha({
                 />
               </div>
             </div>
+
+            {/* Generador de Correos Directivos Sugeridos */}
+            {suggestedEmails.length > 0 && (
+              <div className="p-3 rounded-xl bg-amber-500/[0.07] border border-amber-500/20 text-xs space-y-2">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-semibold text-amber-300 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Correos Directos Sugeridos para {decisor}:</span>
+                  </span>
+                  {isGen && (
+                    <span className="text-[10px] bg-amber-500/20 text-amber-200 px-2 py-0.5 rounded-full font-medium">
+                      Email actual es genérico
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {suggestedEmails.map((item, idx) => {
+                    const isSelected = email.toLowerCase() === item.email.toLowerCase();
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setEmail(item.email)}
+                        className={`text-[11px] px-2.5 py-1 rounded-lg border transition flex items-center gap-1.5 ${
+                          isSelected
+                            ? 'bg-amber-500 text-slate-950 font-bold border-amber-500 shadow-sm'
+                            : 'bg-[#11141D] hover:bg-white/[0.08] border-white/[0.08] text-slate-300 hover:text-white'
+                        }`}
+                        title={`Patrón corporativo: ${item.patron} (${item.popularidad})`}
+                      >
+                        <span>{item.email}</span>
+                        {item.esMasComun && (
+                          <span className={isSelected ? 'text-slate-950 font-black' : 'text-amber-400 font-bold'}>
+                            ★
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[10px] text-slate-400">
+                  Haz clic en cualquiera de las alternativas calculadas para aplicarla como correo principal.
+                </p>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               <div>

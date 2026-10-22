@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Lead } from '@/lib/types';
 import { getLinkedInUrl, isGenericDecisor } from '@/lib/linkedin';
+import { generateExecutiveEmails, isGenericEmail } from '@/lib/email-patterns';
 
 interface LeadCardProps {
   lead: Lead;
@@ -50,6 +51,10 @@ export default function LeadCard({
   // Enlace directo al perfil de la persona o búsqueda de directivos en LinkedIn
   const linkedinUrl = getLinkedInUrl(lead);
   const isGeneric = isGenericDecisor(lead.decisor);
+
+  // Sugerencia de correo directo del tomador de decisión si el correo actual es genérico
+  const suggestedEmails = generateExecutiveEmails(lead.decisor, lead.url || lead.email);
+  const bestDirectEmail = isGenericEmail(lead.email) && suggestedEmails.length > 0 ? suggestedEmails[0] : null;
 
   return (
     <div 
@@ -126,9 +131,19 @@ export default function LeadCard({
 
       {/* Datos de Contacto Rápidos */}
       <div className="space-y-1 mb-3 text-[11px] text-slate-400">
-        <div className="flex items-center gap-2 truncate">
-          <Mail className="w-3 h-3 text-slate-500 flex-shrink-0" />
-          <span className="truncate">{lead.email}</span>
+        <div className="flex items-center justify-between gap-1.5 truncate">
+          <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
+            <Mail className="w-3 h-3 text-slate-500 flex-shrink-0" />
+            <span className="truncate">{lead.email}</span>
+          </div>
+          {bestDirectEmail && (
+            <span 
+              className="text-[9px] text-amber-300 font-medium bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20 flex-shrink-0"
+              title={`Patrón directo detectado para ${lead.decisor}: ${bestDirectEmail.email}`}
+            >
+              Directo: {bestDirectEmail.email.split('@')[0]}@
+            </span>
+          )}
         </div>
         {lead.telefono && (
           <div className="flex items-center gap-2 truncate">

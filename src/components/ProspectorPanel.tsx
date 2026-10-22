@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Lead } from '@/lib/types';
 import { getLinkedInUrl, isGenericDecisor } from '@/lib/linkedin';
+import { generateExecutiveEmails, isGenericEmail } from '@/lib/email-patterns';
 
 interface ProspectorPanelProps {
   onLeadsAgregados: (nuevosLeads: Lead[]) => void;
@@ -741,7 +742,25 @@ export default function ProspectorPanel({
                       </div>
 
                       <div className="pt-2 border-t border-white/[0.04] flex items-center justify-between text-[10px] text-slate-400">
-                        <span className="truncate">{lead.email || 'Web oficial'}</span>
+                        {(() => {
+                          const suggested = generateExecutiveEmails(lead.decisor, lead.url || lead.email);
+                          const isGen = isGenericEmail(lead.email);
+                          const displayEmail = (!isGen && lead.email) ? lead.email : (suggested[0]?.email || lead.email || 'Web oficial');
+
+                          return (
+                            <div className="flex items-center gap-1.5 truncate max-w-[65%]">
+                              <span className="truncate">{displayEmail}</span>
+                              {suggested.length > 0 && isGen && (
+                                <span 
+                                  className="text-[9px] text-amber-300 bg-amber-500/10 px-1 py-0.2 rounded font-medium flex-shrink-0"
+                                  title={`Patrón directo calculado para ${lead.decisor}`}
+                                >
+                                  Directo
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
                         {lead.telefono && <span>{lead.telefono}</span>}
                       </div>
                     </div>

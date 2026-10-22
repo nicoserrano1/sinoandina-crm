@@ -3,6 +3,7 @@ import { buscarEmpresasB2B } from '@/lib/gemini';
 import { getServiceSupabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Lead } from '@/lib/types';
 import { getLinkedInUrl, injectLinkedInIntoNotes } from '@/lib/linkedin';
+import { generateExecutiveEmails, isGenericEmail } from '@/lib/email-patterns';
 
 export async function POST(req: Request) {
   try {
@@ -35,10 +36,13 @@ export async function POST(req: Request) {
           cargo
         });
 
+        const directOptions = generateExecutiveEmails(decisor, emp.url || emp.email);
+        const resolvedEmail = emp.email || (directOptions[0]?.email) || (emp.url ? "contacto@" + emp.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] : 'contacto@empresa.com');
+
         return {
           empresa: emp.nombre,
           url: emp.url || "",
-          email: emp.email || (emp.url ? "contacto@" + emp.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] : 'contacto@empresa.com'),
+          email: resolvedEmail,
           decisor,
           cargo,
           telefono: emp.telefono || "",
@@ -77,11 +81,14 @@ export async function POST(req: Request) {
           cargo
         });
 
+        const directOptions = generateExecutiveEmails(decisor, emp.url || emp.email);
+        const resolvedEmail = emp.email || (directOptions[0]?.email) || (emp.url ? "contacto@" + emp.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] : 'contacto@empresa.com');
+
         return {
           id: `auto-${Date.now()}-${index}`,
           empresa: emp.nombre,
           url: emp.url || "",
-          email: emp.email || (emp.url ? "contacto@" + emp.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] : 'contacto@empresa.com'),
+          email: resolvedEmail,
           decisor,
           cargo,
           telefono: emp.telefono || "",

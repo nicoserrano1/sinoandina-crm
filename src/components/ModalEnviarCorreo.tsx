@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, Send, Copy, Check, Mail } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Send, Copy, Check, Mail, Sparkles } from 'lucide-react';
 import { Lead } from '@/lib/types';
+import { generateExecutiveEmails, isGenericEmail } from '@/lib/email-patterns';
 
 interface ModalEnviarCorreoProps {
   lead: Lead | null;
@@ -20,10 +21,20 @@ export default function ModalEnviarCorreo({
   const [tipo, setTipo] = useState<'intro' | 'followup' | 'cotizacion'>('intro');
   const [asunto, setAsunto] = useState('');
   const [cuerpo, setCuerpo] = useState('');
+  const [destinatario, setDestinatario] = useState(lead?.email || '');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    if (lead) {
+      setDestinatario(lead.email || '');
+    }
+  }, [lead]);
+
   if (!isOpen || !lead) return null;
+
+  const suggestedEmails = generateExecutiveEmails(lead.decisor, lead.url || lead.email);
+  const isGen = isGenericEmail(destinatario);
 
   const handleGenerarCopy = async () => {
     setLoading(true);
@@ -48,13 +59,14 @@ export default function ModalEnviarCorreo({
   };
 
   const handleCopiar = () => {
-    navigator.clipboard.writeText(`Asunto: ${asunto}\n\n${cuerpo}`);
+    navigator.clipboard.writeText(`Para: ${destinatario}\nAsunto: ${asunto}\n\n${cuerpo}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleAbrirEnCliente = async () => {
-    const mailto = `mailto:${lead.email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+    const targetEmail = destinatario.trim() || lead.email;
+    const mailto = `mailto:${targetEmail}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
     window.open(mailto, '_blank');
 
     // Registrar en el historial de actividades de la tarjeta
@@ -65,7 +77,7 @@ export default function ModalEnviarCorreo({
         body: JSON.stringify({
           lead_id: lead.id,
           tipo: 'correo',
-          descripcion: `Asunto: ${asunto}\n\n${cuerpo}`
+          descripcion: `Para: ${targetEmail}\nAsunto: ${asunto}\n\n${cuerpo}`
         })
       });
     } catch (e) {
@@ -77,6 +89,7 @@ export default function ModalEnviarCorreo({
   };
 
   const handleRegistrarComoEnviado = async () => {
+    const targetEmail = destinatario.trim() || lead.email;
     try {
       await fetch('/api/actividades', {
         method: 'POST',
@@ -84,7 +97,7 @@ export default function ModalEnviarCorreo({
         body: JSON.stringify({
           lead_id: lead.id,
           tipo: 'correo',
-          descripcion: `Asunto: ${asunto}\n\n${cuerpo}`
+          descripcion: `Para: ${targetEmail}\nAsunto: ${asunto}\n\n${cuerpo}`
         })
       });
     } catch (e) {
@@ -102,7 +115,7 @@ export default function ModalEnviarCorreo({
         <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-white/[0.06]">
           <div>
             <h3 className="text-sm font-bold text-white">Preparar Correo Comercial</h3>
-            <p className="text-xs text-slate-400 mt-0.5">Destinatario: {lead.email}</p>
+            <p className="text-xs text-slate-400 mt-0.5">Empresa: {lead.empresa} · {lead.decisor}</p>
           </div>
           <button 
             onClick={onClose}
@@ -110,6 +123,60 @@ export default function ModalEnviarCorreo({
           >
             <X className="w-4 h-4" />
           </button>
+        </div>
+
+        {/* Selector de Destinatario con Patrones Directos */}
+        <div className="mb-4 p-3 rounded-xl bg-[#11141D] border border-white/[0.06] space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <label className="font-semibold text-slate-300 flex items-center gap-1.5">
+              <Mail className="w-3.5 h-3.5 text-amber-400" />
+              <span>Enviar a (Destinatario):</span>
+            </label>
+            {isGen && (
+              <span className="text-[10px] text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-full font-medium">
+                Email actual es genérico
+              </span>
+            )}
+          </div>
+
+          <input
+            type="email"
+            value={destinatario}
+            onChange={(e) => setDestinatario(e.target.value)}
+            placeholder="correo@empresa.com"
+            className="w-full bg-[#0C0F17] border border-white/[0.08] focus:border-amber-500/50 rounded-xl px-3 py-1.5 text-xs text-white outline-none transition"
+          />
+
+          {/* Chips con patrones directos calculados para el decisor */}
+          {suggestedEmails.length > 0 && (
+            <div className="pt-2 border-t border-white/[0.04] space-y-1.5">
+              <div className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                <span>Patrones corporativos directos para {lead.decisor}:</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {suggestedEmails.map((item, idx) => {
+                  const isSelected = destinatario.toLowerCase() === item.email.toLowerCase();
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setDestinatario(item.email)}
+                      className={`text-[10px] px-2 py-0.5 rounded-md border transition flex items-center gap-1 ${
+                        isSelected
+                          ? 'bg-amber-500 text-slate-950 font-bold border-amber-500'
+                          : 'bg-[#0C0F17] hover:bg-white/[0.06] border-white/[0.08] text-slate-300 hover:text-white'
+                      }`}
+                      title={`Patrón: ${item.patron} (${item.popularidad})`}
+                    >
+                      <span>{item.email}</span>
+                      {item.esMasComun && <span className={isSelected ? 'text-slate-950 font-black' : 'text-amber-400 font-bold'}>★</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Tipo de Mensaje */}
