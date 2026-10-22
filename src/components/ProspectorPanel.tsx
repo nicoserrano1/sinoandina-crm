@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { Lead } from '@/lib/types';
 import { getLinkedInUrl, isGenericDecisor } from '@/lib/linkedin';
-import { generateExecutiveEmails, isGenericEmail } from '@/lib/email-patterns';
+import { resolveLeadEmails, classifyPhone } from '@/lib/email-patterns';
 
 interface ProspectorPanelProps {
   onLeadsAgregados: (nuevosLeads: Lead[]) => void;
@@ -741,27 +741,40 @@ export default function ProspectorPanel({
                         )}
                       </div>
 
-                      <div className="pt-2 border-t border-white/[0.04] flex items-center justify-between text-[10px] text-slate-400">
+                      <div className="pt-2 border-t border-white/[0.04] space-y-1 text-[10px]">
                         {(() => {
-                          const suggested = generateExecutiveEmails(lead.decisor, lead.url || lead.email);
-                          const isGen = isGenericEmail(lead.email);
-                          const displayEmail = (!isGen && lead.email) ? lead.email : (suggested[0]?.email || lead.email || 'Web oficial');
+                          const emails = resolveLeadEmails(lead);
+                          const phone = classifyPhone(lead.telefono);
 
                           return (
-                            <div className="flex items-center gap-1.5 truncate max-w-[65%]">
-                              <span className="truncate">{displayEmail}</span>
-                              {suggested.length > 0 && isGen && (
-                                <span 
-                                  className="text-[9px] text-amber-300 bg-amber-500/10 px-1 py-0.2 rounded font-medium flex-shrink-0"
-                                  title={`Patrón directo calculado para ${lead.decisor}`}
-                                >
-                                  Directo
-                                </span>
+                            <>
+                              {emails.length > 0 && (
+                                <div className="flex items-center justify-between gap-1 text-slate-300">
+                                  <span className="truncate">{emails[0].email}</span>
+                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded border flex-shrink-0 ${emails[0].badgeColor}`}>
+                                    {emails[0].badgeLabel}
+                                  </span>
+                                </div>
                               )}
-                            </div>
+                              {emails.length > 1 && (
+                                <div className="flex items-center justify-between gap-1 text-slate-400 pl-2">
+                                  <span className="truncate">{emails[1].email}</span>
+                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded border flex-shrink-0 ${emails[1].badgeColor}`}>
+                                    {emails[1].badgeLabel}
+                                  </span>
+                                </div>
+                              )}
+                              {phone.numero && (
+                                <div className="flex items-center justify-between gap-1 text-slate-400 pt-0.5">
+                                  <span className="truncate">{phone.numero}</span>
+                                  <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded border flex-shrink-0 ${phone.badgeColor}`}>
+                                    {phone.badgeLabel}
+                                  </span>
+                                </div>
+                              )}
+                            </>
                           );
                         })()}
-                        {lead.telefono && <span>{lead.telefono}</span>}
                       </div>
                     </div>
                   );

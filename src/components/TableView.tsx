@@ -4,6 +4,7 @@ import React from 'react';
 import { Lead } from '@/lib/types';
 import { ExternalLink } from 'lucide-react';
 import { getLinkedInUrl, isGenericDecisor } from '@/lib/linkedin';
+import { resolveLeadEmails, classifyPhone } from '@/lib/email-patterns';
 
 interface TableViewProps {
   leads: Lead[];
@@ -72,8 +73,38 @@ export default function TableView({ leads, onEditLead }: TableViewProps) {
                   </td>
                   <td className="py-3 px-5 text-slate-400">{lead.cargo}</td>
                   <td className="py-3 px-5">
-                    <div>{lead.email}</div>
-                    {lead.telefono && <div className="text-slate-500 mt-0.5">{lead.telefono}</div>}
+                    {(() => {
+                      const emails = resolveLeadEmails(lead);
+                      const phone = classifyPhone(lead.telefono);
+                      return (
+                        <div className="space-y-1">
+                          {emails.length > 0 && (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-white">{emails[0].email}</span>
+                              <span className={`text-[8px] font-bold px-1 rounded border ${emails[0].badgeColor}`}>
+                                {emails[0].badgeLabel.split(' ')[0]}
+                              </span>
+                            </div>
+                          )}
+                          {emails.length > 1 && (
+                            <div className="flex items-center gap-1.5 text-slate-400 text-[10px]">
+                              <span>{emails[1].email}</span>
+                              <span className={`text-[8px] font-bold px-1 rounded border ${emails[1].badgeColor}`}>
+                                {emails[1].badgeLabel.split(' ')[0]}
+                              </span>
+                            </div>
+                          )}
+                          {phone.numero && (
+                            <div className="flex items-center gap-1.5 text-slate-400 text-[10px] pt-0.5">
+                              <span>{phone.numero}</span>
+                              <span className={`text-[8px] font-bold px-1 rounded border ${phone.badgeColor}`}>
+                                {phone.badgeLabel.split(' ')[0]}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td className="py-3 px-5 font-bold text-emerald-400">
                     {lead.monto_clp ? `$${lead.monto_clp.toLocaleString('es-CL')} CLP` : '-'}

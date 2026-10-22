@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Lead } from '@/lib/types';
 import { getLinkedInUrl, isGenericDecisor } from '@/lib/linkedin';
-import { generateExecutiveEmails, isGenericEmail } from '@/lib/email-patterns';
+import { resolveLeadEmails, classifyPhone } from '@/lib/email-patterns';
 
 interface LeadCardProps {
   lead: Lead;
@@ -52,9 +52,9 @@ export default function LeadCard({
   const linkedinUrl = getLinkedInUrl(lead);
   const isGeneric = isGenericDecisor(lead.decisor);
 
-  // Sugerencia de correo directo del tomador de decisión si el correo actual es genérico
-  const suggestedEmails = generateExecutiveEmails(lead.decisor, lead.url || lead.email);
-  const bestDirectEmail = isGenericEmail(lead.email) && suggestedEmails.length > 0 ? suggestedEmails[0] : null;
+  // Clasificación transparente de correos y teléfonos
+  const emailList = resolveLeadEmails(lead);
+  const phoneInfo = classifyPhone(lead.telefono);
 
   return (
     <div 
@@ -129,26 +129,50 @@ export default function LeadCard({
         )}
       </div>
 
-      {/* Datos de Contacto Rápidos */}
-      <div className="space-y-1 mb-3 text-[11px] text-slate-400">
-        <div className="flex items-center justify-between gap-1.5 truncate">
-          <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
-            <Mail className="w-3 h-3 text-slate-500 flex-shrink-0" />
-            <span className="truncate">{lead.email}</span>
-          </div>
-          {bestDirectEmail && (
+      {/* Datos de Contacto con Certeza y Múltiples Correos */}
+      <div className="space-y-1.5 mb-3 text-[11px]">
+        {/* Email Principal / Web */}
+        {emailList.length > 0 && (
+          <div className="flex items-center justify-between gap-1.5">
+            <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
+              <Mail className="w-3 h-3 text-slate-500 flex-shrink-0" />
+              <span className="truncate text-slate-300 font-medium">{emailList[0].email}</span>
+            </div>
             <span 
-              className="text-[9px] text-amber-300 font-medium bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20 flex-shrink-0"
-              title={`Patrón directo detectado para ${lead.decisor}: ${bestDirectEmail.email}`}
+              className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border flex-shrink-0 ${emailList[0].badgeColor}`}
+              title={emailList[0].descripcion}
             >
-              Directo: {bestDirectEmail.email.split('@')[0]}@
+              {emailList[0].badgeLabel}
             </span>
-          )}
-        </div>
-        {lead.telefono && (
-          <div className="flex items-center gap-2 truncate">
-            <Phone className="w-3 h-3 text-slate-500 flex-shrink-0" />
-            <span className="truncate">{lead.telefono}</span>
+          </div>
+        )}
+
+        {/* Segundo correo posible / Estimación directa */}
+        {emailList.length > 1 && (
+          <div className="flex items-center justify-between gap-1.5 pl-4 text-[10px]">
+            <span className="truncate text-slate-400">{emailList[1].email}</span>
+            <span 
+              className={`text-[9px] font-semibold px-1.5 py-0.2 rounded border flex-shrink-0 ${emailList[1].badgeColor}`}
+              title={emailList[1].descripcion}
+            >
+              {emailList[1].badgeLabel}
+            </span>
+          </div>
+        )}
+
+        {/* Teléfono con Clasificación Transparente */}
+        {phoneInfo.numero && (
+          <div className="flex items-center justify-between gap-1.5">
+            <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
+              <Phone className="w-3 h-3 text-slate-500 flex-shrink-0" />
+              <span className="truncate text-slate-400">{phoneInfo.numero}</span>
+            </div>
+            <span 
+              className={`text-[9px] font-semibold px-1.5 py-0.5 rounded border flex-shrink-0 ${phoneInfo.badgeColor}`}
+              title={phoneInfo.descripcion}
+            >
+              {phoneInfo.badgeLabel}
+            </span>
           </div>
         )}
       </div>

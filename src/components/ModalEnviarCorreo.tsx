@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Send, Copy, Check, Mail, Sparkles } from 'lucide-react';
 import { Lead } from '@/lib/types';
-import { generateExecutiveEmails, isGenericEmail } from '@/lib/email-patterns';
+import { generateExecutiveEmails, isGenericEmail, resolveLeadEmails } from '@/lib/email-patterns';
 
 interface ModalEnviarCorreoProps {
   lead: Lead | null;
@@ -33,7 +33,7 @@ export default function ModalEnviarCorreo({
 
   if (!isOpen || !lead) return null;
 
-  const suggestedEmails = generateExecutiveEmails(lead.decisor, lead.url || lead.email);
+  const allEmails = lead ? resolveLeadEmails(lead) : [];
   const isGen = isGenericEmail(destinatario);
 
   const handleGenerarCopy = async () => {
@@ -147,30 +147,34 @@ export default function ModalEnviarCorreo({
             className="w-full bg-[#0C0F17] border border-white/[0.08] focus:border-amber-500/50 rounded-xl px-3 py-1.5 text-xs text-white outline-none transition"
           />
 
-          {/* Chips con patrones directos calculados para el decisor */}
-          {suggestedEmails.length > 0 && (
+          {/* Opciones de correos detectados y patrones */}
+          {allEmails.length > 0 && (
             <div className="pt-2 border-t border-white/[0.04] space-y-1.5">
-              <div className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                <span>Patrones corporativos directos para {lead.decisor}:</span>
+              <div className="text-[10px] text-slate-400 font-medium flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  <span>Alternativas de envío (Web Central vs Directo):</span>
+                </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {suggestedEmails.map((item, idx) => {
+                {allEmails.map((item, idx) => {
                   const isSelected = destinatario.toLowerCase() === item.email.toLowerCase();
                   return (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => setDestinatario(item.email)}
-                      className={`text-[10px] px-2 py-0.5 rounded-md border transition flex items-center gap-1 ${
+                      className={`text-[10px] px-2.5 py-1 rounded-lg border transition flex items-center gap-1.5 ${
                         isSelected
-                          ? 'bg-amber-500 text-slate-950 font-bold border-amber-500'
+                          ? 'bg-amber-500 text-slate-950 font-bold border-amber-500 shadow-sm'
                           : 'bg-[#0C0F17] hover:bg-white/[0.06] border-white/[0.08] text-slate-300 hover:text-white'
                       }`}
-                      title={`Patrón: ${item.patron} (${item.popularidad})`}
+                      title={item.descripcion}
                     >
                       <span>{item.email}</span>
-                      {item.esMasComun && <span className={isSelected ? 'text-slate-950 font-black' : 'text-amber-400 font-bold'}>★</span>}
+                      <span className={`text-[8px] font-bold px-1 py-0.2 rounded border ${isSelected ? 'bg-slate-950/20 text-slate-950 border-slate-950/30' : item.badgeColor}`}>
+                        {item.badgeLabel}
+                      </span>
                     </button>
                   );
                 })}

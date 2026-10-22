@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { Lead, LeadStatus, PipelineEtapa, Actividad } from '@/lib/types';
 import { getLinkedInUrl, isGenericDecisor, extractLinkedInFromNotes } from '@/lib/linkedin';
-import { generateExecutiveEmails, isGenericEmail } from '@/lib/email-patterns';
+import { generateExecutiveEmails, isGenericEmail, resolveLeadEmails, classifyPhone } from '@/lib/email-patterns';
 
 interface ModalLeadFichaProps {
   lead: Lead | null;
@@ -105,8 +105,8 @@ export default function ModalLeadFicha({
     notas
   });
   const isGeneric = isGenericDecisor(decisor);
-  const suggestedEmails = generateExecutiveEmails(decisor, lead.url || email);
-  const isGen = isGenericEmail(email);
+  const allLeadEmails = resolveLeadEmails({ email, decisor, url: lead.url });
+  const phoneInfo = classifyPhone(telefono);
 
   const handleGuardar = async () => {
     setLoading(true);
@@ -327,7 +327,7 @@ export default function ModalLeadFicha({
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Email</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Email Principal</label>
                 <input
                   type="email"
                   value={email}
@@ -336,7 +336,14 @@ export default function ModalLeadFicha({
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Teléfono / WhatsApp</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-slate-300">Teléfono</label>
+                  {phoneInfo.numero && (
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${phoneInfo.badgeColor}`} title={phoneInfo.descripcion}>
+                      {phoneInfo.badgeLabel}
+                    </span>
+                  )}
+                </div>
                 <input
                   type="text"
                   value={telefono}
@@ -346,48 +353,63 @@ export default function ModalLeadFicha({
               </div>
             </div>
 
-            {/* Generador de Correos Directivos Sugeridos */}
-            {suggestedEmails.length > 0 && (
-              <div className="p-3 rounded-xl bg-amber-500/[0.07] border border-amber-500/20 text-xs space-y-2">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-semibold text-amber-300 flex items-center gap-1.5">
+            {/* Transparencia y Múltiples Correos del Lead */}
+            {allLeadEmails.length > 0 && (
+              <div className="p-3.5 rounded-xl bg-amber-500/[0.05] border border-amber-500/20 text-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-amber-300 flex items-center gap-1.5 text-xs">
                     <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Correos Directos Sugeridos para {decisor}:</span>
+                    <span>Correos Detectados vs Estimados por Patrón IA:</span>
                   </span>
-                  {isGen && (
-                    <span className="text-[10px] bg-amber-500/20 text-amber-200 px-2 py-0.5 rounded-full font-medium">
-                      Email actual es genérico
-                    </span>
-                  )}
+                  <span className="text-[10px] text-slate-400">
+                    {allLeadEmails.length} opciones disponibles
+                  </span>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {suggestedEmails.map((item, idx) => {
+
+                <div className="space-y-1.5">
+                  {allLeadEmails.map((item, idx) => {
                     const isSelected = email.toLowerCase() === item.email.toLowerCase();
                     return (
-                      <button
+                      <div
                         key={idx}
-                        type="button"
-                        onClick={() => setEmail(item.email)}
-                        className={`text-[11px] px-2.5 py-1 rounded-lg border transition flex items-center gap-1.5 ${
+                        className={`p-2.5 rounded-xl border flex items-center justify-between gap-2.5 transition ${
                           isSelected
-                            ? 'bg-amber-500 text-slate-950 font-bold border-amber-500 shadow-sm'
-                            : 'bg-[#11141D] hover:bg-white/[0.08] border-white/[0.08] text-slate-300 hover:text-white'
+                            ? 'bg-amber-500/[0.12] border-amber-500/40 ring-1 ring-amber-500/30'
+                            : 'bg-[#11141D] border-white/[0.06] hover:border-white/[0.12]'
                         }`}
-                        title={`Patrón corporativo: ${item.patron} (${item.popularidad})`}
                       >
-                        <span>{item.email}</span>
-                        {item.esMasComun && (
-                          <span className={isSelected ? 'text-slate-950 font-black' : 'text-amber-400 font-bold'}>
-                            ★
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs font-semibold ${isSelected ? 'text-amber-200' : 'text-white'}`}>
+                              {item.email}
+                            </span>
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${item.badgeColor}`}>
+                              {item.badgeLabel}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-400 mt-0.5">
+                            {item.descripcion}
+                          </p>
+                        </div>
+
+                        {!isSelected ? (
+                          <button
+                            type="button"
+                            onClick={() => setEmail(item.email)}
+                            className="px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-amber-500 hover:text-slate-950 text-slate-300 text-[10px] font-bold border border-white/[0.08] transition flex-shrink-0"
+                            title="Asignar como correo principal de este contacto"
+                          >
+                            Usar este
+                          </button>
+                        ) : (
+                          <span className="text-[10px] font-bold text-amber-400 flex-shrink-0 flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                            <span>Principal ✓</span>
                           </span>
                         )}
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
-                <p className="text-[10px] text-slate-400">
-                  Haz clic en cualquiera de las alternativas calculadas para aplicarla como correo principal.
-                </p>
               </div>
             )}
 
