@@ -14,6 +14,7 @@ import {
   FileText
 } from 'lucide-react';
 import { Lead, LeadStatus, PipelineEtapa, Actividad } from '@/lib/types';
+import { getLinkedInUrl, isGenericDecisor, extractLinkedInFromNotes } from '@/lib/linkedin';
 
 interface ModalLeadFichaProps {
   lead: Lead | null;
@@ -51,6 +52,7 @@ export default function ModalLeadFicha({
   const [partida, setPartida] = useState('');
   const [estado, setEstado] = useState<LeadStatus>('Nuevo');
   const [notas, setNotas] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Historial de Actividades
@@ -70,6 +72,7 @@ export default function ModalLeadFicha({
       setPartida(lead.partida || '');
       setEstado(lead.estado || 'Nuevo');
       setNotas(lead.notas || '');
+      setLinkedinUrl(lead.linkedin_url || extractLinkedInFromNotes(lead.notas) || '');
 
       fetchActividades(lead.id);
     }
@@ -92,6 +95,15 @@ export default function ModalLeadFicha({
 
   if (!isOpen || !lead) return null;
 
+  const activeLinkedinUrl = getLinkedInUrl({
+    empresa: lead.empresa,
+    decisor,
+    cargo,
+    linkedin_url: linkedinUrl,
+    notas
+  });
+  const isGeneric = isGenericDecisor(decisor);
+
   const handleGuardar = async () => {
     setLoading(true);
     try {
@@ -107,7 +119,8 @@ export default function ModalLeadFicha({
           monto_clp: Number(monto) || 0,
           partida,
           estado,
-          notas
+          notas,
+          linkedin_url: linkedinUrl.trim()
         })
       });
 
@@ -249,13 +262,14 @@ export default function ModalLeadFicha({
               </span>
 
               <a
-                href={`https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(lead.empresa.replace(/SpA|S\.A\.|Limitada|Ltda\.?|Chile/gi, '').trim() + ' gerente OR director OR fundador OR compras')}`}
+                href={activeLinkedinUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[11px] font-semibold text-sky-400 hover:text-sky-300 flex items-center gap-1 hover:underline"
-                title="Abrir búsqueda de empleados en LinkedIn"
+                title={isGeneric ? "Buscar directivos en LinkedIn" : `Abrir perfil de ${decisor} en LinkedIn`}
               >
-                <span>Buscar directivos en LinkedIn ➜</span>
+                <span className="font-bold">in</span>
+                <span>{isGeneric ? "Buscar directivos en LinkedIn ➜" : `Abrir perfil de ${decisor} en LinkedIn ➜`}</span>
               </a>
             </div>
 
@@ -278,6 +292,33 @@ export default function ModalLeadFicha({
                   className="w-full bg-[#11141D] border border-white/[0.08] focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs text-white outline-none transition"
                 />
               </div>
+            </div>
+
+            {/* Enlace de Perfil de LinkedIn editable */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <span className="font-bold text-sky-400">in</span>
+                  <span>Enlace de Perfil en LinkedIn</span>
+                </span>
+                {activeLinkedinUrl && (
+                  <a
+                    href={activeLinkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-sky-400 hover:underline flex items-center gap-1"
+                  >
+                    <span>Abrir perfil recomendado ↗</span>
+                  </a>
+                )}
+              </label>
+              <input
+                type="url"
+                value={linkedinUrl}
+                onChange={(e) => setLinkedinUrl(e.target.value)}
+                placeholder="https://www.linkedin.com/in/... o enlace directo a su perfil"
+                className="w-full bg-[#11141D] border border-white/[0.08] focus:border-amber-500/50 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition"
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-3">

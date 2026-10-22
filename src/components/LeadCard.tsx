@@ -12,6 +12,7 @@ import {
   GripVertical
 } from 'lucide-react';
 import { Lead } from '@/lib/types';
+import { getLinkedInUrl, isGenericDecisor } from '@/lib/linkedin';
 
 interface LeadCardProps {
   lead: Lead;
@@ -46,15 +47,9 @@ export default function LeadCard({
 
   const waLink = getWhatsAppLink();
 
-  // Búsqueda directa y precisa de directivos en LinkedIn
-  const getLinkedInSearchUrl = () => {
-    if (lead.linkedin_url) return lead.linkedin_url;
-    const cleanCompany = lead.empresa.replace(/SpA|S\.A\.|Limitada|Ltda\.?|Chile/gi, '').trim();
-    const cleanCargo = lead.cargo && lead.cargo !== 'Equipo Directivo' ? lead.cargo : 'gerente OR director OR fundador';
-    return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(cleanCompany + ' ' + cleanCargo)}`;
-  };
-
-  const linkedinUrl = getLinkedInSearchUrl();
+  // Enlace directo al perfil de la persona o búsqueda de directivos en LinkedIn
+  const linkedinUrl = getLinkedInUrl(lead);
+  const isGeneric = isGenericDecisor(lead.decisor);
 
   return (
     <div 
@@ -105,7 +100,10 @@ export default function LeadCard({
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
           className="px-2 py-1 rounded-lg bg-[#0077B5]/10 hover:bg-[#0077B5]/25 border border-[#0077B5]/30 text-[#0077B5] hover:text-sky-300 text-[10px] font-bold transition flex items-center gap-1 flex-shrink-0"
-          title="Ver perfiles reales de esta empresa en LinkedIn"
+          title={isGeneric 
+            ? `Buscar directivos de ${lead.empresa} en LinkedIn` 
+            : `Abrir perfil de ${lead.decisor} (${lead.empresa}) en LinkedIn`
+          }
         >
           <span>in</span>
         </a>

@@ -78,10 +78,11 @@ REGLAS ESTRICTAS DE CALIDAD B2B (CERO NOMBRES INVENTADOS):
 Para cada empresa entrega información comercial verificable:
 - nombre: Nombre comercial oficial.
 - url: Sitio web oficial (https://...).
-- tomador_decision: Nombre completo del directivo real público, o "Equipo Directivo" si no está disponible.
+- tomador_decision: Nombre completo del directivo real público (ej: "Rafael Valdivieso", "Paulo Bezanilla"), o "Equipo Directivo" si no está disponible.
 - cargo: Cargo específico y variado según la empresa.
 - email: Correo corporativo o departamental de contacto (ej: contacto@..., gerencia@..., proyectos@...).
 - telefono: Teléfono de contacto comercial (+56 9 XXXX XXXX o +56 2 XXXX XXXX).
+- linkedin_url: Si conoces su URL de perfil personal (https://www.linkedin.com/in/...), inclúyela. Si conoces su nombre real, genera el enlace directo a esa persona: https://www.linkedin.com/search/results/people/?keywords=Nombre+Apellido+Empresa
 - area_interes: Área, servicio o producto específico de su negocio que calza con esta búsqueda.
 - por_que_es_match: Una frase concisa explicando por qué esta empresa es un cliente ideal para esta oferta.
 
@@ -91,10 +92,11 @@ Devuelve ÚNICAMENTE un JSON válido con la estructura:
     {
       "nombre": "Nombre de Empresa",
       "url": "https://empresa.com",
-      "tomador_decision": "Nombre Decisor",
+      "tomador_decision": "Nombre y Apellido Decisor",
       "cargo": "Cargo del Decisor",
       "email": "contacto@empresa.com",
       "telefono": "+56 9 1234 5678",
+      "linkedin_url": "https://www.linkedin.com/search/results/people/?keywords=...",
       "area_interes": "Área de Interés",
       "por_que_es_match": "Razón por la cual calza con el perfil buscado."
     }

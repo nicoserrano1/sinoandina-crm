@@ -3,6 +3,7 @@
 import React from 'react';
 import { Lead } from '@/lib/types';
 import { ExternalLink } from 'lucide-react';
+import { getLinkedInUrl, isGenericDecisor } from '@/lib/linkedin';
 
 interface TableViewProps {
   leads: Lead[];
@@ -49,7 +50,26 @@ export default function TableView({ leads, onEditLead }: TableViewProps) {
                       </a>
                     )}
                   </td>
-                  <td className="py-3 px-5 font-medium">{lead.decisor}</td>
+                  <td className="py-3 px-5 font-medium">
+                    <div className="flex items-center gap-1.5">
+                      <span>{lead.decisor}</span>
+                      {(() => {
+                        const linkedinUrl = getLinkedInUrl(lead);
+                        const isGeneric = isGenericDecisor(lead.decisor);
+                        return (
+                          <a
+                            href={linkedinUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-1.5 py-0.5 rounded bg-[#0077B5]/15 hover:bg-[#0077B5]/30 border border-[#0077B5]/30 text-sky-400 text-[10px] font-bold transition flex items-center"
+                            title={isGeneric ? `Buscar directivos de ${lead.empresa} en LinkedIn` : `Abrir perfil de ${lead.decisor} (${lead.empresa}) en LinkedIn`}
+                          >
+                            in
+                          </a>
+                        );
+                      })()}
+                    </div>
+                  </td>
                   <td className="py-3 px-5 text-slate-400">{lead.cargo}</td>
                   <td className="py-3 px-5">
                     <div>{lead.email}</div>

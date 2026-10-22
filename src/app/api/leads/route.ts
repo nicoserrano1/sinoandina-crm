@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServiceSupabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Lead } from '@/lib/types';
+import { extractLinkedInFromNotes, injectLinkedInIntoNotes } from '@/lib/linkedin';
 
 // Almacén en memoria como fallback si Supabase aún no está conectado
 let localLeadsFallback: Lead[] = [
@@ -61,7 +62,13 @@ export async function GET() {
         console.error('Error fetching leads from Supabase:', error);
         return NextResponse.json({ leads: localLeadsFallback, source: 'local' });
       }
-      return NextResponse.json({ leads: data || [], source: 'supabase' });
+
+      const enrichedLeads = (data || []).map((l: any) => ({
+        ...l,
+        linkedin_url: extractLinkedInFromNotes(l.notas) || l.linkedin_url || undefined
+      }));
+
+      return NextResponse.json({ leads: enrichedLeads, source: 'supabase' });
     }
 
     return NextResponse.json({ leads: localLeadsFallback, source: 'local' });
@@ -73,18 +80,24 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const linkedinUrl = body.linkedin_url || undefined;
+    const finalNotas = linkedinUrl 
+      ? injectLinkedInIntoNotes(body.notas || "", linkedinUrl)
+      : (body.notas || "");
+
     const newLead: Lead = {
       id: "lead-" + Date.now(),
       empresa: body.empresa,
       url: body.url || "",
       email: body.email,
-      decisor: body.decisor || "Jefatura de Abastecimiento",
-      cargo: body.cargo || "Gerente de Adquisiciones",
+      decisor: body.decisor || "Equipo Directivo",
+      cargo: body.cargo || "Dirección",
       telefono: body.telefono || "",
       monto_clp: Number(body.monto_clp) || 0,
       partida: body.partida || "",
       estado: body.estado || "Nuevo",
-      notas: body.notas || "",
+      notas: finalNotas,
+      linkedin_url: linkedinUrl,
       created_at: new Date().toISOString()
     };
 
@@ -108,7 +121,10 @@ export async function POST(req: Request) {
         .single();
 
       if (error) throw error;
-      return NextResponse.json({ success: true, lead: data });
+      return NextResponse.json({ 
+        success: true, 
+        lead: { ...data, linkedin_url: linkedinUrl } 
+      });
     }
 
     localLeadsFallback.unshift(newLead);
@@ -121,7 +137,11 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const body = await req.json();
-    const { id, ...updates } = body;
+    const { id, linkedin_url, ...updates } = body;
+
+    if (linkedin_url !== undefined) {
+      updates.notas = injectLinkedInIntoNotes(updates.notas, linkedin_url);
+    }
 
     const supabase = getServiceSupabase();
     if (isSupabaseConfigured && supabase) {
@@ -133,12 +153,23 @@ export async function PATCH(req: Request) {
         .single();
 
       if (error) throw error;
-      return NextResponse.json({ success: true, lead: data });
+      return NextResponse.json({ 
+        success: true, 
+        lead: { 
+          ...data, 
+          linkedin_url: extractLinkedInFromNotes(data.notas) || linkedin_url 
+        } 
+      });
     }
 
     const idx = localLeadsFallback.findIndex(l => l.id === id);
     if (idx !== -1) {
-      localLeadsFallback[idx] = { ...localLeadsFallback[idx], ...updates, updated_at: new Date().toISOString() };
+      localLeadsFallback[idx] = { 
+        ...localLeadsFallback[idx], 
+        ...updates, 
+        linkedin_url: linkedin_url !== undefined ? linkedin_url : localLeadsFallback[idx].linkedin_url,
+        updated_at: new Date().toISOString() 
+      };
       return NextResponse.json({ success: true, lead: localLeadsFallback[idx] });
     }
 

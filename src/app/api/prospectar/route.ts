@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { buscarEmpresasB2B } from '@/lib/gemini';
 import { getServiceSupabase, isSupabaseConfigured } from '@/lib/supabase';
 import { Lead } from '@/lib/types';
+import { getLinkedInUrl, injectLinkedInIntoNotes } from '@/lib/linkedin';
 
 export async function POST(req: Request) {
   try {
@@ -25,18 +26,31 @@ export async function POST(req: Request) {
     let leadsGuardados: Lead[] = [];
 
     if (isSupabaseConfigured && supabase) {
-      const recordsToInsert = empresasEncontradas.map((emp: any) => ({
-        empresa: emp.nombre,
-        url: emp.url || "",
-        email: emp.email || (emp.url ? "contacto@" + emp.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] : 'contacto@empresa.com'),
-        decisor: emp.tomador_decision || "Equipo Directivo",
-        cargo: emp.cargo || (decisorTipo && decisorTipo.trim() !== '' ? decisorTipo : "Dirección"),
-        telefono: emp.telefono || "",
-        monto_clp: 0,
-        partida: emp.area_interes || emp.partida || "",
-        estado: "Nuevo",
-        notas: emp.por_que_es_match || `Prospectado para: ${criterio}`
-      }));
+      const recordsToInsert = empresasEncontradas.map((emp: any) => {
+        const decisor = emp.tomador_decision || "Equipo Directivo";
+        const cargo = emp.cargo || (decisorTipo && decisorTipo.trim() !== '' ? decisorTipo : "Dirección");
+        const linkedinUrl = emp.linkedin_url || getLinkedInUrl({
+          empresa: emp.nombre,
+          decisor,
+          cargo
+        });
+
+        return {
+          empresa: emp.nombre,
+          url: emp.url || "",
+          email: emp.email || (emp.url ? "contacto@" + emp.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] : 'contacto@empresa.com'),
+          decisor,
+          cargo,
+          telefono: emp.telefono || "",
+          monto_clp: 0,
+          partida: emp.area_interes || emp.partida || "",
+          estado: "Nuevo",
+          notas: injectLinkedInIntoNotes(
+            emp.por_que_es_match || `Prospectado para: ${criterio}`,
+            linkedinUrl
+          )
+        };
+      });
 
       const { data, error } = await supabase
         .from('leads')
@@ -46,24 +60,42 @@ export async function POST(req: Request) {
       if (error) {
         console.error("Error guardando en Supabase:", error);
       } else {
-        leadsGuardados = data || [];
+        // Enriquecer con linkedin_url en el payload retornado
+        leadsGuardados = (data || []).map((lead: any, i: number) => ({
+          ...lead,
+          linkedin_url: recordsToInsert[i]?.notas ? getLinkedInUrl(recordsToInsert[i]) : undefined
+        }));
       }
     } else {
       // Fallback local
-      leadsGuardados = empresasEncontradas.map((emp: any, index: number) => ({
-        id: `auto-${Date.now()}-${index}`,
-        empresa: emp.nombre,
-        url: emp.url || "",
-        email: emp.email || (emp.url ? "contacto@" + emp.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] : 'contacto@empresa.com'),
-        decisor: emp.tomador_decision || "Equipo Directivo",
-        cargo: emp.cargo || (decisorTipo && decisorTipo.trim() !== '' ? decisorTipo : "Dirección"),
-        telefono: emp.telefono || "",
-        monto_clp: 0,
-        partida: emp.area_interes || emp.partida || "",
-        estado: "Nuevo" as const,
-        notas: emp.por_que_es_match || `Prospectado para: ${criterio}`,
-        created_at: new Date().toISOString()
-      }));
+      leadsGuardados = empresasEncontradas.map((emp: any, index: number) => {
+        const decisor = emp.tomador_decision || "Equipo Directivo";
+        const cargo = emp.cargo || (decisorTipo && decisorTipo.trim() !== '' ? decisorTipo : "Dirección");
+        const linkedinUrl = emp.linkedin_url || getLinkedInUrl({
+          empresa: emp.nombre,
+          decisor,
+          cargo
+        });
+
+        return {
+          id: `auto-${Date.now()}-${index}`,
+          empresa: emp.nombre,
+          url: emp.url || "",
+          email: emp.email || (emp.url ? "contacto@" + emp.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] : 'contacto@empresa.com'),
+          decisor,
+          cargo,
+          telefono: emp.telefono || "",
+          monto_clp: 0,
+          partida: emp.area_interes || emp.partida || "",
+          estado: "Nuevo" as const,
+          notas: injectLinkedInIntoNotes(
+            emp.por_que_es_match || `Prospectado para: ${criterio}`,
+            linkedinUrl
+          ),
+          linkedin_url: linkedinUrl,
+          created_at: new Date().toISOString()
+        };
+      });
     }
 
     return NextResponse.json({

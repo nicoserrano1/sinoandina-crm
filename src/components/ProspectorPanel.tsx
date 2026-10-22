@@ -18,6 +18,7 @@ import {
   Briefcase
 } from 'lucide-react';
 import { Lead } from '@/lib/types';
+import { getLinkedInUrl, isGenericDecisor } from '@/lib/linkedin';
 
 interface ProspectorPanelProps {
   onLeadsAgregados: (nuevosLeads: Lead[]) => void;
@@ -686,11 +687,8 @@ export default function ProspectorPanel({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {leadsDescubiertos.map((lead, idx) => {
-                  const cleanCompany = lead.empresa.replace(/SpA|S\.A\.|Limitada|Ltda\.?|Chile/gi, '').trim();
-                  const targetKeywords = lead.cargo && lead.cargo !== 'Equipo Directivo'
-                    ? `${cleanCompany} ${lead.cargo}`
-                    : `${cleanCompany} gerente OR director OR fundador`;
-                  const linkedinUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(targetKeywords)}`;
+                  const linkedinUrl = getLinkedInUrl(lead);
+                  const isGeneric = isGenericDecisor(lead.decisor);
 
                   return (
                     <div 
@@ -727,11 +725,11 @@ export default function ProspectorPanel({
                             href={linkedinUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-2 py-1 rounded-lg bg-[#0077B5]/15 hover:bg-[#0077B5]/30 border border-[#0077B5]/30 text-sky-400 text-[10px] font-bold flex items-center gap-1 transition flex-shrink-0"
-                            title="Buscar ejecutivos y directivos reales en LinkedIn"
+                            className="px-2.5 py-1 rounded-lg bg-[#0077B5]/15 hover:bg-[#0077B5]/30 border border-[#0077B5]/30 text-sky-400 text-[10px] font-bold flex items-center gap-1 transition flex-shrink-0"
+                            title={isGeneric ? `Buscar directivos de ${lead.empresa} en LinkedIn` : `Abrir perfil de ${lead.decisor} (${lead.empresa}) en LinkedIn`}
                           >
                             <span>in</span>
-                            <span>LinkedIn</span>
+                            <span>{isGeneric ? "LinkedIn" : "Ver perfil"}</span>
                           </a>
                         </div>
 
